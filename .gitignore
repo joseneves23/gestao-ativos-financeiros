@@ -1,0 +1,44 @@
+# Build Folders
+bin/
+obj/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Package directories
+packages/
+
+# Environment variables
+.env
+
+# Other
+*.cache
+*.pdb
+*.mdb
+*.opendb
+
+# Visual Studio specific
+.vs/
+*.ncrunchproject
+*.ncrunchsolution
+_ReSharper.Caches
+
