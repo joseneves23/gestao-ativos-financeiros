@@ -1,7 +1,22 @@
+using AtivosFinanceiros.Models;
+using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
+
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+var connectionString = $"Host={Env.GetString("POSTGRES_HOST")};" +
+                       $"Port={Env.GetString("POSTGRES_PORT")};" +
+                       $"Database={Env.GetString("POSTGRES_DB")};" +
+                       $"Username={Env.GetString("POSTGRES_USER")};" +
+                       $"Password={Env.GetString("POSTGRES_PASSWORD")}";
+
+
+builder.Services.AddDbContext<MeuDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 

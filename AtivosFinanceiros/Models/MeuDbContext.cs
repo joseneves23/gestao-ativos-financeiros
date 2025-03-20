@@ -28,9 +28,22 @@ public partial class MeuDbContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Database=es2;Username=postgres;Password=");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
+                .Build();
 
+            var connectionString = $"Host={configuration["POSTGRES_HOST"]};" +
+                                   $"Port={configuration["POSTGRES_PORT"]};" +
+                                   $"Database={configuration["POSTGRES_DB"]};" +
+                                   $"Username={configuration["POSTGRES_USER"]};" +
+                                   $"Password={configuration["POSTGRES_PASSWORD"]}";
+
+            optionsBuilder.UseNpgsql(connectionString);
+        }
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
@@ -219,9 +232,19 @@ public partial class MeuDbContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("username");
         });
-
+        
         OnModelCreatingPartial(modelBuilder);
     }
-
+    public bool CanConnect()
+    {
+        try
+        {
+            return this.Database.CanConnect();
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
