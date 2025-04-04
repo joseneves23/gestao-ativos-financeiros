@@ -103,11 +103,56 @@ public class HomeController : Controller
                 if (hashed == user.Senha)
                 {
                     // Authentication successful
-                    return RedirectToAction("Index", "Home");
+                    //return RedirectToAction("Index", "Home");
+                    // Authentication successful
+                    HttpContext.Session.SetString("UserUuid", user.UserUuid.ToString());  // Store user ID in session
+                    _logger.LogInformation($"User logged in: {user.Username} with UUID: {user.UserUuid}");
+                    return RedirectToAction("CreateAtivoo", "Home");
                 }
             }
             ModelState.AddModelError("", "Invalid login attempt.");
         }
         return View(model);
     }
+    
+    
+    public IActionResult CreateAtivoo()
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    public IActionResult CreateAtivo(Ativo ativo)
+    {
+        string userId = HttpContext.Session.GetString("UserUuid");
+        if (string.IsNullOrEmpty(userId))
+        {
+            TempData["ErrorMessage"] = "User session expired or invalid.";
+            _logger.LogError("Session error: User session expired or invalid or UserUuid not found.");
+            return View("CreateAtivoo", ativo);
+        }
+
+        try
+        {
+            ativo.UserUuid = Guid.Parse(userId);  
+            _context.Ativos.Add(ativo);
+            _context.SaveChanges();
+            TempData["Message"] = "Ativo criado com sucesso!";
+            _logger.LogInformation($"Asset created for UserUuid: {userId}");
+            return RedirectToAction("CreateAtivoo");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Erro ao criar: " + ex.Message;
+            _logger.LogError(ex, "Exception while creating asset.");
+            return View("CreateAtivoo", ativo);
+        }
+    }
+
+
+
+
+
+
+    
 }

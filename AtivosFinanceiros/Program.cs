@@ -8,6 +8,23 @@ Env.Load();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
+//Novo
+
+// Setup for distributed memory cache and session management
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true; // Essential for the session cookie
+});
+
+
+
+//Novo
+
 var connectionString = $"Host={Env.GetString("POSTGRES_HOST")};" +
                        $"Port={Env.GetString("POSTGRES_PORT")};" +
                        $"Database={Env.GetString("POSTGRES_DB")};" +
@@ -30,6 +47,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseSession(); // Initialize session middleware here Novo
 
 app.UseAuthorization();
 

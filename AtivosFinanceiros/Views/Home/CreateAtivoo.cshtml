@@ -1,0 +1,75 @@
+@model AtivosFinanceiros.Models.Ativo
+
+@{
+    ViewData["Title"] = "Criar Ativo";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Message"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+
+
+
+<div class="container">
+    <p></p>
+
+    
+    <form asp-controller="Home" asp-action="CreateAtivo" method="post">
+
+        <div class="form-group">
+            <label for="Nome">Nome:</label>
+            <input type="text" id="Nome" name="Nome" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+            <label for="TipoAtivo">Tipo Ativo:</label>
+            <select id="TipoAtivo" name="TipoAtivo" class="form-control">
+                <option value="">Seleciona o tipo de ativo</option>
+                <option value="DepositoPrazo">Deposito a Prazo</option>
+                <option value="FundoInvestimento">Fundo de Investimento</option>
+                <option value="ImovelArrendado">Imovel Arrendado</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="DataInicio">Data Inicio:</label>
+            <input type="date" id="DataInicio" name="DataInicio" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/>
+        </div>
+        <div class="form-group">
+            <label for="DuracaoMeses">Duração (Meses):</label>
+            <input type="number" id="DuracaoMeses" name="DuracaoMeses" class="form-control" required/>
+        </div>
+        <div class="form-group">
+            <label for="ValorInicial">Valor Inicial:</label>
+            <input type="number" id="ValorInicial" name="ValorInicial" class="form-control" step="0.01" required/>
+        </div>
+        <div class="form-group">
+            <label for="ImpostoPerc">Percentagem Imposto:</label>
+            <input type="number" id="ImpostoPerc" name="ImpostoPerc" class="form-control" step="0.01"/>
+        </div>
+        <div class="form-group">
+            <label for="LucroTotal">Lucro Total:</label>
+            <input type="number" id="LucroTotal" name="LucroTotal" class="form-control" step="0.01"/>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+@section Scripts {
+    
+}
