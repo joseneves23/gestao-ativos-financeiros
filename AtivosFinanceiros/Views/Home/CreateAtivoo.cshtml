@@ -2,74 +2,74 @@
 
 @{
     ViewData["Title"] = "Criar Ativo";
+    Layout = null;
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">@ViewData["Title"]</h2>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Message"]
+                        </div>
+                    }
 
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
 
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Message"]
+                    <form asp-controller="Home" asp-action="CreateAtivo" method="post">
+                        <div class="form-group mb-3">
+                            <label for="Nome">Nome:</label>
+                            <input type="text" id="Nome" name="Nome" class="form-control" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="TipoAtivo">Tipo Ativo:</label>
+                            <select id="TipoAtivo" name="TipoAtivo" class="form-control">
+                                <option value="">Seleciona o tipo de ativo</option>
+                                <option value="DepositoPrazo">Deposito a Prazo</option>
+                                <option value="FundoInvestimento">Fundo de Investimento</option>
+                                <option value="ImovelArrendado">Imovel Arrendado</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="DataInicio">Data Início:</label>
+                            <input type="date" id="DataInicio" name="DataInicio" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="DuracaoMeses">Duração (Meses):</label>
+                            <input type="number" id="DuracaoMeses" name="DuracaoMeses" class="form-control" required/>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="ValorInicial">Valor Inicial:</label>
+                            <input type="number" id="ValorInicial" name="ValorInicial" class="form-control" step="0.01" required/>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="ImpostoPerc">Percentagem Imposto:</label>
+                            <input type="number" id="ImpostoPerc" name="ImpostoPerc" class="form-control" step="0.01"/>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="LucroTotal">Lucro Total:</label>
+                            <input type="number" id="LucroTotal" name="LucroTotal" class="form-control" step="0.01"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Criar</button>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
     </div>
-}
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["ErrorMessage"]
-    </div>
-}
-
-
-
-
-<div class="container">
-    <p></p>
-
-    
-    <form asp-controller="Home" asp-action="CreateAtivo" method="post">
-
-        <div class="form-group">
-            <label for="Nome">Nome:</label>
-            <input type="text" id="Nome" name="Nome" class="form-control" required />
-        </div>
-
-        <div class="form-group">
-            <label for="TipoAtivo">Tipo Ativo:</label>
-            <select id="TipoAtivo" name="TipoAtivo" class="form-control">
-                <option value="">Seleciona o tipo de ativo</option>
-                <option value="DepositoPrazo">Deposito a Prazo</option>
-                <option value="FundoInvestimento">Fundo de Investimento</option>
-                <option value="ImovelArrendado">Imovel Arrendado</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="DataInicio">Data Inicio:</label>
-            <input type="date" id="DataInicio" name="DataInicio" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/>
-        </div>
-        <div class="form-group">
-            <label for="DuracaoMeses">Duração (Meses):</label>
-            <input type="number" id="DuracaoMeses" name="DuracaoMeses" class="form-control" required/>
-        </div>
-        <div class="form-group">
-            <label for="ValorInicial">Valor Inicial:</label>
-            <input type="number" id="ValorInicial" name="ValorInicial" class="form-control" step="0.01" required/>
-        </div>
-        <div class="form-group">
-            <label for="ImpostoPerc">Percentagem Imposto:</label>
-            <input type="number" id="ImpostoPerc" name="ImpostoPerc" class="form-control" step="0.01"/>
-        </div>
-        <div class="form-group">
-            <label for="LucroTotal">Lucro Total:</label>
-            <input type="number" id="LucroTotal" name="LucroTotal" class="form-control" step="0.01"/>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
 </div>
 
-@section Scripts {
-    
-}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
