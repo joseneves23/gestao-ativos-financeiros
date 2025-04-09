@@ -71,7 +71,7 @@ public class HomeController : Controller
         }
     }
     
-    public IActionResult MeusAtivos(string nome, string tipo)
+    public IActionResult MeusAtivos(string nome, string tipo, decimal? montanteMinimo, decimal? montanteMaximo)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
@@ -89,8 +89,19 @@ public class HomeController : Controller
         if (!string.IsNullOrEmpty(tipo))
             query = query.Where(a => a.TipoAtivo == tipo);
         
+        if (montanteMinimo.HasValue || montanteMaximo.HasValue)
+        {
+            if (montanteMinimo.HasValue)
+                query = query.Where(a => a.ValorInicial >= montanteMinimo);
+
+            if (montanteMaximo.HasValue)
+                query = query.Where(a => a.ValorInicial <= montanteMaximo);
+        }
+        
         ViewBag.FiltroNome = nome;
         ViewBag.FiltroTipo = tipo;
+        ViewBag.FiltroMontanteMinimo = montanteMinimo;
+        ViewBag.FiltroMontanteMaximo = montanteMaximo;
 
         return View(query.ToList());
     }

@@ -22,7 +22,6 @@
     </div>
 </div>
 
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -45,14 +44,15 @@
                             @TempData["ErrorMessage"]
                         </div>
                     }
-                    
+
                     <form method="get" class="mb-4">
                         <div class="row">
-                            <div class="form-group col-md-5 mb-3">
+                            <div class="form-group col-md-4 mb-3">
                                 <label for="nome">Nome:</label>
                                 <input type="text" name="nome" id="nome" class="form-control" placeholder="Pesquisar por nome" value="@ViewBag.FiltroNome"/>
                             </div>
-                            <div class="form-group col-md-5 mb-3">
+                            
+                            <div class="form-group col-md-4 mb-3">
                                 <label for="tipo">Tipo de Ativo:</label>
                                 <select name="tipo" id="tipo" class="form-control">
                                     <option value="">Todos os tipos</option>
@@ -61,7 +61,18 @@
                                     <option value="ImovelArrendado" selected="@(ViewBag.FiltroTipo == "ImovelArrendado")">Imóvel Arrendado</option>
                                 </select>
                             </div>
-                            <div class="form-group col-md-2 mb-3 d-flex align-items-end">
+                            
+                            <div class="form-group col-md-2 mb-3">
+                                <label for="montanteMinimo">Montante Mínimo:</label>
+                                <input type="number" name="montanteMinimo" id="montanteMinimo" class="form-control" placeholder="Ex. 100" value="@ViewBag.FiltroMontanteMinimo"/>
+                            </div>
+                            
+                            <div class="form-group col-md-2 mb-3">
+                                <label for="montanteMaximo">Montante Máximo:</label>
+                                <input type="number" name="montanteMaximo" id="montanteMaximo" class="form-control" placeholder="Ex. 10000" value="@ViewBag.FiltroMontanteMaximo"/>
+                            </div>
+                            
+                            <div class="form-group col-md-12 mb-3 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
                             </div>
                         </div>
