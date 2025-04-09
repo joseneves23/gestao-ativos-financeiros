@@ -1,0 +1,113 @@
+﻿@model List<AtivosFinanceiros.Models.Ativo>
+
+@{
+    ViewData["Title"] = "Meus Ativos";
+    Layout = null;
+}
+
+<div class="container-fluid p-3">
+    <div class="position-relative">
+        <div class="position-absolute top-0 end-0">
+            <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </div>
+        
+        <div class="text-center">
+            <span style="font-size: 30px; font-weight: bold;">
+                Olá, @User.Identity.Name!
+            </span>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2>@ViewData["Title"]</h2>
+                </div>
+                <div class="card-body">
+
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Message"]
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+                    
+                    <form method="get" class="mb-4">
+                        <div class="row">
+                            <div class="form-group col-md-5 mb-3">
+                                <label for="nome">Nome:</label>
+                                <input type="text" name="nome" id="nome" class="form-control" placeholder="Pesquisar por nome" value="@ViewBag.FiltroNome"/>
+                            </div>
+                            <div class="form-group col-md-5 mb-3">
+                                <label for="tipo">Tipo de Ativo:</label>
+                                <select name="tipo" id="tipo" class="form-control">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="DepositoPrazo" selected="@(ViewBag.FiltroTipo == "DepositoPrazo")">Depósito a Prazo</option>
+                                    <option value="FundoInvestimento" selected="@(ViewBag.FiltroTipo == "FundoInvestimento")">Fundo de Investimento</option>
+                                    <option value="ImovelArrendado" selected="@(ViewBag.FiltroTipo == "ImovelArrendado")">Imóvel Arrendado</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2 mb-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>Valor Inicial</th>
+                                <th>Data Início</th>
+                                <th>Duração (Meses)</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var ativo in Model)
+                            {
+                                <tr>
+                                    <td>@ativo.Nome</td>
+                                    <td>@ativo.TipoAtivo</td>
+                                    <td>@ativo.ValorInicial.ToString("C")</td>
+                                    <td>@ativo.DataInicio.ToShortDateString()</td>
+                                    <td>@ativo.DuracaoMeses</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            Nenhum ativo encontrado.
+                        </div>
+                    }
+                </div>
+                <div class="card-footer text-center">
+                    <a href="/Home/CreateAtivoo" class="btn btn-secondary">Criar Novo Ativo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

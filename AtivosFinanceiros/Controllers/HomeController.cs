@@ -61,7 +61,7 @@ public class HomeController : Controller
             _context.SaveChanges();
             TempData["Message"] = "Ativo criado com sucesso!";
             _logger.LogInformation($"Asset created for UserUuid: {userIdClaim.Value}");
-            return RedirectToAction("CreateAtivoo");
+            return RedirectToAction("MeusAtivos");
         }
         catch (Exception ex)
         {
@@ -70,11 +70,30 @@ public class HomeController : Controller
             return View("CreateAtivoo", ativo);
         }
     }
-
-
-
-
-
-
     
+    public IActionResult MeusAtivos(string nome, string tipo)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            return Unauthorized();
+        }
+
+        var userId = Guid.Parse(userIdClaim.Value);
+
+        var query = _context.Ativos.Where(a => a.UserUuid == userId);
+
+        if (!string.IsNullOrEmpty(nome))
+            query = query.Where(a => a.Nome.Contains(nome));
+
+        if (!string.IsNullOrEmpty(tipo))
+            query = query.Where(a => a.TipoAtivo == tipo);
+        
+        ViewBag.FiltroNome = nome;
+        ViewBag.FiltroTipo = tipo;
+
+        return View(query.ToList());
+    }
+
+
 }
