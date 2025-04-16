@@ -1,3 +1,4 @@
+using AtivosFinanceiros.Facades;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using AtivosFinanceiros.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,10 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true; // Essential for the session cookie
 });
+
+builder.Services.AddScoped<AtivoFacade>();
+
+
 
 // Add authentication services
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

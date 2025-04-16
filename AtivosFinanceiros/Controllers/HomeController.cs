@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using AtivosFinanceiros.Models;
 using Microsoft.AspNetCore.Authorization;
+using AtivosFinanceiros.Facades;
 
 namespace AtivosFinanceiros.Controllers;
 
@@ -11,24 +12,24 @@ public class HomeController : Controller
 {
     private readonly MeuDbContext _context;
     private readonly ILogger<HomeController> _logger;
+    private readonly AtivoFacade _ativoFacade;
 
-    public HomeController(ILogger<HomeController> logger, MeuDbContext context)
+    public HomeController(ILogger<HomeController> logger, MeuDbContext context, AtivoFacade ativoFacade)
     {
         _context = context;
         _logger = logger;
+        _ativoFacade = ativoFacade;
     }
 
     public IActionResult Index()
     {
-        bool canConnect = _context.CanConnect();
-        ViewBag.CanConnect = canConnect;
+        ViewBag.CanConnect = _ativoFacade.PodeConectar();
         return View();
     }
 
     public IActionResult Privacy()
     {
-        bool canConnect = _context.CanConnect();
-        ViewBag.CanConnect = canConnect;
+        ViewBag.CanConnect = _ativoFacade.PodeConectar();
         return View();
     }
 
@@ -37,74 +38,34 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
-    
+
     public IActionResult CreateAtivoo()
     {
         return View();
     }
-    
+
     [HttpPost]
     public IActionResult CreateAtivo(Ativo ativo)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
+        if (_ativoFacade.CriarAtivo(ativo, User, out var errorMessage))
         {
-            TempData["ErrorMessage"] = "User session expired or invalid.";
-            _logger.LogError("Session error: User session expired or invalid or UserUuid not found.");
-            return View("CreateAtivoo", ativo);
-        }
-
-        try
-        {
-            ativo.UserUuid = Guid.Parse(userIdClaim.Value);
-            _context.Ativos.Add(ativo);
-            _context.SaveChanges();
             TempData["Message"] = "Ativo criado com sucesso!";
-            _logger.LogInformation($"Asset created for UserUuid: {userIdClaim.Value}");
             return RedirectToAction("MeusAtivos");
         }
-        catch (Exception ex)
-        {
-            TempData["ErrorMessage"] = "Erro ao criar: " + ex.Message;
-            _logger.LogError(ex, "Exception while creating asset.");
-            return View("CreateAtivoo", ativo);
-        }
+
+        TempData["ErrorMessage"] = errorMessage;
+        return View("CreateAtivoo", ativo);
     }
-    
+
     public IActionResult MeusAtivos(string nome, string tipo, decimal? montanteMinimo, decimal? montanteMaximo)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
-        {
-            return Unauthorized();
-        }
+        var ativos = _ativoFacade.ObterAtivosFiltrados(User, nome, tipo, montanteMinimo, montanteMaximo);
 
-        var userId = Guid.Parse(userIdClaim.Value);
-
-        var query = _context.Ativos.Where(a => a.UserUuid == userId);
-
-        if (!string.IsNullOrEmpty(nome))
-            query = query.Where(a => a.Nome.Contains(nome));
-
-        if (!string.IsNullOrEmpty(tipo))
-            query = query.Where(a => a.TipoAtivo == tipo);
-        
-        if (montanteMinimo.HasValue || montanteMaximo.HasValue)
-        {
-            if (montanteMinimo.HasValue)
-                query = query.Where(a => a.ValorInicial >= montanteMinimo);
-
-            if (montanteMaximo.HasValue)
-                query = query.Where(a => a.ValorInicial <= montanteMaximo);
-        }
-        
         ViewBag.FiltroNome = nome;
         ViewBag.FiltroTipo = tipo;
         ViewBag.FiltroMontanteMinimo = montanteMinimo;
         ViewBag.FiltroMontanteMaximo = montanteMaximo;
 
-        return View(query.ToList());
+        return View(ativos);
     }
-
-
 }
