@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using AtivosFinanceiros.Filters;
 using Microsoft.AspNetCore.Mvc;
 using AtivosFinanceiros.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -80,24 +81,19 @@ public class HomeController : Controller
         }
 
         var userId = Guid.Parse(userIdClaim.Value);
-
         var query = _context.Ativos.Where(a => a.UserUuid == userId);
 
-        if (!string.IsNullOrEmpty(nome))
-            query = query.Where(a => a.Nome.Contains(nome));
-
-        if (!string.IsNullOrEmpty(tipo))
-            query = query.Where(a => a.TipoAtivo == tipo);
-        
-        if (montanteMinimo.HasValue || montanteMaximo.HasValue)
+        var filtros = new List<IAtivoFiltro>
         {
-            if (montanteMinimo.HasValue)
-                query = query.Where(a => a.ValorInicial >= montanteMinimo);
+            new FiltroNome(nome),
+            new FiltroTipo(tipo),
+            new FiltroMontanteMinimo(montanteMinimo),
+            new FiltroMontanteMaximo(montanteMaximo)
+        };
 
-            if (montanteMaximo.HasValue)
-                query = query.Where(a => a.ValorInicial <= montanteMaximo);
-        }
-        
+        var contexto = new AtivoFilterContext(filtros);
+        query = contexto.AplicarFiltros(query);
+
         ViewBag.FiltroNome = nome;
         ViewBag.FiltroTipo = tipo;
         ViewBag.FiltroMontanteMinimo = montanteMinimo;
@@ -105,6 +101,5 @@ public class HomeController : Controller
 
         return View(query.ToList());
     }
-
-
+    
 }
