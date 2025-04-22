@@ -29,7 +29,7 @@ public partial class Ativo
 
     public virtual ICollection<ImovelArrendado> ImovelArrendados { get; set; } = new List<ImovelArrendado>();
 
-    public virtual Usuario UserUu { get; set; } = null!;
+    public virtual Usuario User { get; set; } = null!;
 
     public virtual ICollection<Relatorio> RelatorioUus { get; set; } = new List<Relatorio>();
 }

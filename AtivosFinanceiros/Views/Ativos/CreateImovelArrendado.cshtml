@@ -27,7 +27,7 @@
                         </div>
                     }
 
-                    <form asp-controller="Home" asp-action="CreateImovelArrendado" method="post">
+                    <form asp-controller="Ativos" asp-action="CreateImovelArrendado" method="post">
                         <input type="hidden" asp-for="AtivoUuid" value="@ViewBag.AtivoUuid" />
 
                         <div class="form-group mb-3">
@@ -58,7 +58,7 @@
                         <button type="submit" class="btn btn-primary w-100">Adicionar Imóvel</button>
                     </form>
 
-                    <a href="/Home/MeusAtivos" class="btn btn-secondary mt-3">Ver Meus Ativos</a>
+                    <a href="/Ativos/MeusAtivos" class="btn btn-secondary mt-3">Ver Meus Ativos</a>
                 </div>
             </div>
         </div>

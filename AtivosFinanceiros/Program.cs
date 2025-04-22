@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using AtivosFinanceiros.Models;
+using AtivosFinanceiros.Services;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 
@@ -19,7 +20,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Essential for the session cookie
 });
 
+
 // Add authentication services
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

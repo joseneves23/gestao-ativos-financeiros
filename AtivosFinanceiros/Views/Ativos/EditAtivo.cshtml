@@ -1,0 +1,141 @@
+﻿@model AtivosFinanceiros.Models.Ativo
+
+@{
+    ViewData["Title"] = "Editar Ativo";
+    Layout = null;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">@ViewData["Title"]</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Ativos" asp-action="EditAtivo" method="post">
+                        <input type="hidden" name="AtivoUuid" value="@Model.AtivoUuid" />
+
+                        <div class="form-group mb-3">
+                            <label for="Nome">Nome:</label>
+                            <input type="text" id="Nome" name="Nome" class="form-control" value="@Model.Nome" required />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="TipoAtivo">Tipo Ativo:</label>
+                            <select id="TipoAtivo" name="TipoAtivo" class="form-control" disabled>
+                                <option value="DepositoPrazo" selected="@(Model.TipoAtivo == "DepositoPrazo")">Depósito a Prazo</option>
+                                <option value="FundoInvestimento" selected="@(Model.TipoAtivo == "FundoInvestimento")">Fundo de Investimento</option>
+                                <option value="ImovelArrendado" selected="@(Model.TipoAtivo == "ImovelArrendado")">Imóvel Arrendado</option>
+                            </select>
+                            <input type="hidden" name="TipoAtivo" value="@Model.TipoAtivo" />
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="form-group mb-3">
+                            <label for="DataInicio">Data Início:</label>
+                            <input type="date" id="DataInicio" name="DataInicio" class="form-control" value="@Model.DataInicio.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="DuracaoMeses">Duração (Meses):</label>
+                            <input type="number" id="DuracaoMeses" name="DuracaoMeses" class="form-control" value="@Model.DuracaoMeses" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="ValorInicial">Valor Inicial:</label>
+                            <input type="number" id="ValorInicial" name="ValorInicial" class="form-control" value="@Model.ValorInicial" step="0.01" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="ImpostoPerc">Percentagem Imposto:</label>
+                            <input type="number" id="ImpostoPerc" name="ImpostoPerc" class="form-control" value="@Model.ImpostoPerc" step="0.01" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="LucroTotal">Lucro Total:</label>
+                            <input type="number" id="LucroTotal" name="LucroTotal" class="form-control" value="@Model.LucroTotal" step="0.01" />
+                        </div>
+
+                        <!-- Dynamic Fields -->
+                        <div id="DepositoPrazoFields" style="display: none;">
+                            <div class="form-group mb-3">
+                                <label for="Banco">Banco:</label>
+                                <input type="text" id="Banco" name="Banco" class="form-control"
+                                       value="@(Model.DepositoPrazos?.FirstOrDefault()?.Banco ?? string.Empty)" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="NumeroConta">Número da Conta:</label>
+                                <input type="text" id="NumeroConta" name="NumeroConta" class="form-control"
+                                       value="@(Model.DepositoPrazos?.FirstOrDefault()?.NumeroConta ?? string.Empty)" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="JurosPadrao">Valor Inicial:</label>
+                                <input type="number" id="ValorInicial" name="ValorInicial" class="form-control"
+                                       value="@(Model.DepositoPrazos?.FirstOrDefault()?.ValorInicial ?? 0)" step="0.01" />
+                            </div>
+                            
+                        </div>
+
+                        <div id="FundoInvestimentoFields" style="display: none;">
+                            <div class="form-group mb-3">
+                                <label for="JurosPadrao">Juros Padrão:</label>
+                                <input type="number" id="JurosPadrao" name="JurosPadrao" class="form-control"
+                                       value="@(Model.FundoInvestimentos?.FirstOrDefault()?.JurosPadrao ?? 0)" step="0.01" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="MonteInvestido">Montante Investido:</label>
+                                <input type="number" id="MonteInvestido" name="MonteInvestido" class="form-control"
+                                       value="@(Model.FundoInvestimentos?.FirstOrDefault()?.MonteInvestido ?? 0)" step="0.01" />
+                            </div>
+                        </div>
+
+                        <div id="ImovelArrendadoFields" style="display: none;">
+                            <div class="form-group mb-3">
+                                <label for="Localizacao">Localização:</label>
+                                <input type="text" id="Localizacao" name="Localizacao" class="form-control"
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.Localizacao ?? string.Empty)" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="ValorImovel">Valor do Imóvel:</label>
+                                <input type="number" id="ValorImovel" name="ValorImovel" class="form-control"
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorImovel ?? 0)" step="1" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="ValorImovel">Valor da Renda:</label>
+                                <input type="number" id="ValorRenda" name="ValorRenda" class="form-control"
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorRenda ?? 0)" step="1" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="ValorImovel">Valor do Condominio:</label>
+                                <input type="number" id="ValorCondominio" name="ValorCondominio" class="form-control"
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorCondominio ?? 0)" step="1" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="ValorImovel">Despesas Anuais:</label>
+                                <input type="number" id="DespesasAnuais" name="DespesasAnuais" class="form-control"
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.DespesasAnuais ?? 0)" step="0.01" />
+                            </div>
+                            
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <a href="@Url.Action("MeusAtivos", "Ativos")" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleFields() {
+        const tipoAtivo = document.getElementById("TipoAtivo").value;
+        document.getElementById("DepositoPrazoFields").style.display = tipoAtivo === "DepositoPrazo" ? "block" : "none";
+        document.getElementById("FundoInvestimentoFields").style.display = tipoAtivo === "FundoInvestimento" ? "block" : "none";
+        document.getElementById("ImovelArrendadoFields").style.display = tipoAtivo === "ImovelArrendado" ? "block" : "none";
+    }
+
+    // Initialize fields on page load
+    toggleFields();
+</script>

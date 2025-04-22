@@ -2,7 +2,7 @@
 
 CREATE TABLE usuario (
                          user_uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-                         email VARCHAR(255) NOT NULL,
+                         email VARCHAR(255) NOT NULL UNIQUE,
                          senha VARCHAR(255) NOT NULL,
                          username VARCHAR(255) NOT NULL,
                          tipo_perfil VARCHAR(50)
