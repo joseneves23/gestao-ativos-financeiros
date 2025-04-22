@@ -59,8 +59,15 @@ public class HomeController : Controller
             ativo.UserUuid = Guid.Parse(userIdClaim.Value);
             _context.Ativos.Add(ativo);
             _context.SaveChanges();
+
             TempData["Message"] = "Ativo criado com sucesso!";
-            _logger.LogInformation($"Asset created for UserUuid: {userIdClaim.Value}");
+            _logger.LogInformation($"Ativo criado com sucesso: {ativo.AtivoUuid}");
+            
+            if (ativo.TipoAtivo == "ImovelArrendado")
+            {
+                return RedirectToAction("CreateImovelArrendado", new { ativoUuid = ativo.AtivoUuid });
+            }
+
             return RedirectToAction("MeusAtivos");
         }
         catch (Exception ex)
@@ -105,6 +112,43 @@ public class HomeController : Controller
 
         return View(query.ToList());
     }
+    
+    public IActionResult CreateImovelArrendado(Guid ativoUuid)
+    {
+        ViewBag.AtivoUuid = ativoUuid;
+        return View();
+    }
+    
+    [HttpPost]
+    public IActionResult CreateImovelArrendado(ImovelArrendado imovel)
+    {
+        try
+        {
+            _context.ImovelArrendados.Add(imovel);
+            _context.SaveChanges();
+            TempData["Message"] = "Imóvel arrendado adicionado com sucesso!";
+            return RedirectToAction("MeusAtivos");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Erro ao salvar o imóvel: " + ex.Message;
+            return View(imovel);
+        }
+    }
+    
+    public IActionResult DetalhesAtivo(Guid id)
+    {
+        var ativo = _context.Ativos.FirstOrDefault(a => a.AtivoUuid == id);
+        if (ativo == null)
+        {
+            return NotFound();
+        }
+        
+        var imovel = _context.ImovelArrendados.FirstOrDefault(i => i.AtivoUuid == id);
 
+        ViewBag.Imovel = imovel;
+        return View(ativo);
+    }
 
+    
 }

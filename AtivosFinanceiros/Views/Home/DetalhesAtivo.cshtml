@@ -1,0 +1,63 @@
+@model AtivosFinanceiros.Models.Ativo
+
+@{
+    ViewData["Title"] = "Detalhes do Ativo";
+    Layout = null;
+    var imovel = ViewBag.Imovel as AtivosFinanceiros.Models.ImovelArrendado;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>@Model.Nome (@Model.TipoAtivo)</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Data de Início</dt>
+                        <dd class="col-sm-8">@Model.DataInicio.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Duração (meses)</dt>
+                        <dd class="col-sm-8">@Model.DuracaoMeses</dd>
+
+                        <dt class="col-sm-4">Valor Inicial</dt>
+                        <dd class="col-sm-8">@Model.ValorInicial.ToString("C")</dd>
+
+                        <dt class="col-sm-4">Imposto (%)</dt>
+                        <dd class="col-sm-8">@Model.ImpostoPerc</dd>
+
+                        <dt class="col-sm-4">Lucro Total</dt>
+                        <dd class="col-sm-8">@Model.LucroTotal?.ToString("C")</dd>
+                    </dl>
+
+                    @if (imovel != null)
+                    {
+                        <hr />
+                        <h4>Informações do Imóvel Arrendado</h4>
+                        <dl class="row">
+                            <dt class="col-sm-4">Localização</dt>
+                            <dd class="col-sm-8">@imovel.Localizacao</dd>
+
+                            <dt class="col-sm-4">Valor do Imóvel</dt>
+                            <dd class="col-sm-8">@imovel.ValorImovel.ToString("C")</dd>
+
+                            <dt class="col-sm-4">Valor da Renda</dt>
+                            <dd class="col-sm-8">@imovel.ValorRenda.ToString("C")</dd>
+
+                            <dt class="col-sm-4">Condomínio</dt>
+                            <dd class="col-sm-8">@imovel.ValorCondominio.ToString("C")</dd>
+
+                            <dt class="col-sm-4">Despesas Anuais</dt>
+                            <dd class="col-sm-8">@imovel.DespesasAnuais.ToString("C")</dd>
+                        </dl>
+                    }
+
+                    <a href="/Home/MeusAtivos" class="btn btn-secondary mt-3">Voltar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />

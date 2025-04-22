@@ -101,12 +101,15 @@
                                     <td>@ativo.DataInicio.ToShortDateString()</td>
                                     <td>@ativo.DuracaoMeses</td>
                                     <td>
-                                        <a asp-controller="Ativos" asp-action="EditAtivo" asp-route-id="@ativo.AtivoUuid" class="btn btn-primary btn-sm">Editar</a>
+                                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("DetalhesAtivo", "Home", new { id = ativo.AtivoUuid })">
+                                            Ver Detalhes
+                                        </a>
                                     </td>
                                 </tr>
                             }
                             </tbody>
-                        </table>                    }
+                        </table>
+                    }
                     else
                     {
                         <div class="alert alert-info text-center">
