@@ -1,0 +1,70 @@
+@model AtivosFinanceiros.Models.ImovelArrendado
+
+@{
+    ViewData["Title"] = "Adicionar Imóvel Arrendado";
+    Layout = null;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">@ViewData["Title"]</h2>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Message"]
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+
+                    <form asp-controller="Home" asp-action="CreateImovelArrendado" method="post">
+                        <input type="hidden" asp-for="AtivoUuid" value="@ViewBag.AtivoUuid" />
+
+                        <div class="form-group mb-3">
+                            <label for="Localizacao">Localização:</label>
+                            <input type="text" id="Localizacao" name="Localizacao" class="form-control" required />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="ValorImovel">Valor do Imóvel:</label>
+                            <input type="number" id="ValorImovel" name="ValorImovel" class="form-control" step="0.01" required />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="ValorRenda">Valor da Renda:</label>
+                            <input type="number" id="ValorRenda" name="ValorRenda" class="form-control" step="0.01" required />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="ValorCondominio">Valor do Condomínio:</label>
+                            <input type="number" id="ValorCondominio" name="ValorCondominio" class="form-control" step="0.01" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="DespesasAnuais">Despesas Anuais:</label>
+                            <input type="number" id="DespesasAnuais" name="DespesasAnuais" class="form-control" step="0.01" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Adicionar Imóvel</button>
+                    </form>
+
+                    <a href="/Home/MeusAtivos" class="btn btn-secondary mt-3">Ver Meus Ativos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>

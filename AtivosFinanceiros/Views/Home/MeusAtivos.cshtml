@@ -88,6 +88,7 @@
                                 <th>Valor Inicial</th>
                                 <th>Data Início</th>
                                 <th>Duração (Meses)</th>
+                                <th>Ações</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -99,6 +100,11 @@
                                     <td>@ativo.ValorInicial.ToString("C")</td>
                                     <td>@ativo.DataInicio.ToShortDateString()</td>
                                     <td>@ativo.DuracaoMeses</td>
+                                    <td>
+                                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("DetalhesAtivo", "Home", new { id = ativo.AtivoUuid })">
+                                            Ver Detalhes
+                                        </a>
+                                    </td>
                                 </tr>
                             }
                             </tbody>
