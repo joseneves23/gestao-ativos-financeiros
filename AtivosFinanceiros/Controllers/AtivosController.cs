@@ -194,12 +194,15 @@ public class AtivosController : Controller
             TempData["Message"] = "Ativo criado com sucesso!";
             _logger.LogInformation($"Ativo criado com sucesso: {ativo.AtivoUuid}");
             
-            if (ativo.TipoAtivo == "ImovelArrendado")
-            {
-                return RedirectToAction("CreateImovelArrendado", new { ativoUuid = ativo.AtivoUuid });
-            }
+            
 
-            return RedirectToAction("MeusAtivos");
+            return ativo.TipoAtivo switch
+            {
+                "ImovelArrendado" => RedirectToAction("CreateImovelArrendado", new { ativoUuid = ativo.AtivoUuid }),
+                "FundoInvestimento" => RedirectToAction("CreateFundoInvestimento", new { ativoUuid = ativo.AtivoUuid }),
+                _ => RedirectToAction("MeusAtivos")
+            };
+            
         }
         catch (Exception ex)
         {
@@ -243,6 +246,29 @@ public class AtivosController : Controller
 
         return View(query.ToList());
     }
+
+    public IActionResult CreateFundoInvestimento(Guid ativoUuid)
+    {
+        ViewBag.AtivoUuid = ativoUuid;
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult CreateFundoInvestimento(FundoInvestimento fundoInvestimento)
+    {
+        try
+        {
+            _context.FundoInvestimentos.Add(fundoInvestimento);
+            _context.SaveChanges();
+            TempData["Message"] = "Fundo de investimento adicionado com sucesso!";
+            return RedirectToAction("MeusAtivos");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Erro ao guardar o fundo de investimento: " + ex.Message;
+            return View(fundoInvestimento);
+        }
+    }
     
     public IActionResult CreateImovelArrendado(Guid ativoUuid)
     {
@@ -262,7 +288,7 @@ public class AtivosController : Controller
         }
         catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "Erro ao salvar o imóvel: " + ex.Message;
+            TempData["ErrorMessage"] = "Erro ao guardar o imóvel: " + ex.Message;
             return View(imovel);
         }
     }
@@ -275,9 +301,15 @@ public class AtivosController : Controller
             return NotFound();
         }
         
-        var imovel = _context.ImovelArrendados.FirstOrDefault(i => i.AtivoUuid == id);
+        if (ativo.TipoAtivo == "ImovelArrendado")
+        {
+            ViewBag.Imovel = _context.ImovelArrendados.FirstOrDefault(i => i.AtivoUuid == id);
+        }
+        else if (ativo.TipoAtivo == "FundoInvestimento")
+        {
+            ViewBag.Fundo = _context.FundoInvestimentos.FirstOrDefault(f => f.AtivoUuid == id);
+        }
 
-        ViewBag.Imovel = imovel;
         return View(ativo);
     }
     

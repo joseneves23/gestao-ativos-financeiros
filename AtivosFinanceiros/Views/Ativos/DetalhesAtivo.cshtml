@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Detalhes do Ativo";
     Layout = null;
-    var imovel = ViewBag.Imovel as AtivosFinanceiros.Models.ImovelArrendado;
 }
 
 <div class="container mt-5">
@@ -30,29 +29,31 @@
                         <dt class="col-sm-4">Lucro Total</dt>
                         <dd class="col-sm-8">@Model.LucroTotal?.ToString("C")</dd>
                     </dl>
-
-                    @if (imovel != null)
+                    
+                    @if (Model.TipoAtivo == "ImovelArrendado" && ViewBag.Imovel != null)
                     {
-                        <hr />
-                        <h4>Informações do Imóvel Arrendado</h4>
-                        <dl class="row">
-                            <dt class="col-sm-4">Localização</dt>
-                            <dd class="col-sm-8">@imovel.Localizacao</dd>
-
-                            <dt class="col-sm-4">Valor do Imóvel</dt>
-                            <dd class="col-sm-8">@imovel.ValorImovel.ToString("C")</dd>
-
-                            <dt class="col-sm-4">Valor da Renda</dt>
-                            <dd class="col-sm-8">@imovel.ValorRenda.ToString("C")</dd>
-
-                            <dt class="col-sm-4">Condomínio</dt>
-                            <dd class="col-sm-8">@imovel.ValorCondominio.ToString("C")</dd>
-
-                            <dt class="col-sm-4">Despesas Anuais</dt>
-                            <dd class="col-sm-8">@imovel.DespesasAnuais.ToString("C")</dd>
-                        </dl>
+                        var imovel = (AtivosFinanceiros.Models.ImovelArrendado)ViewBag.Imovel;
+                        <div class="card-footer bg-light">
+                            <h5 class="fw-semibold">Informações do Imóvel Arrendado</h5>
+                            <p><strong>Localização:</strong> @imovel.Localizacao</p>
+                            <p><strong>Valor do Imóvel:</strong> @imovel.ValorImovel.ToString("C")</p>
+                            <p><strong>Valor da Renda:</strong> @imovel.ValorRenda.ToString("C")</p>
+                            <p><strong>Valor do Condomínio:</strong> @imovel.ValorCondominio.ToString("C")</p>
+                            <p><strong>Despesas Anuais:</strong> @imovel.DespesasAnuais.ToString("C")</p>
+                        </div>
                     }
-
+                    
+                    @if (Model.TipoAtivo == "FundoInvestimento" && ViewBag.Fundo != null)
+                    {
+                        var fundo = (AtivosFinanceiros.Models.FundoInvestimento)ViewBag.Fundo;
+                        <div class="card-footer bg-light">
+                            <h5 class="fw-semibold">Informações do Fundo de Investimento</h5>
+                            <p><strong>Montante Investido:</strong> @fundo.MonteInvestido.ToString("C")</p>
+                            <p><strong>Juros Padrão:</strong> @fundo.JurosPadrao?.ToString("P")</p>
+                            <p><strong>Juros Mensal:</strong> @fundo.JurosMensal?.ToString("P")</p>
+                        </div>
+                    }
+                    
                     <a href="/Ativos/MeusAtivos" class="btn btn-secondary mt-3">Voltar</a>
                 </div>
             </div>
