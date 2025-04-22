@@ -32,6 +32,12 @@ public class AuthController : Controller
     {
         if (ModelState.IsValid)
         {
+            var existingUser = _context.Usuarios.SingleOrDefault(u => u.Email == model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email already exists.");
+                return View(model);
+            }
             try
             {
                 _authService.RegisterUser(model);
@@ -45,8 +51,15 @@ public class AuthController : Controller
         }
         return View(model);
     }
+    
+    [HttpGet]
     public IActionResult Login()
     {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("MeusAtivos", "Home");
+        }
+
         return View();
     }
     

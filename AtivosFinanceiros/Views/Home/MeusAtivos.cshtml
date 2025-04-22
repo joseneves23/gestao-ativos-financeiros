@@ -88,6 +88,7 @@
                                 <th>Valor Inicial</th>
                                 <th>Data Início</th>
                                 <th>Duração (Meses)</th>
+                                <th>Ações</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -99,11 +100,13 @@
                                     <td>@ativo.ValorInicial.ToString("C")</td>
                                     <td>@ativo.DataInicio.ToShortDateString()</td>
                                     <td>@ativo.DuracaoMeses</td>
+                                    <td>
+                                        <a asp-controller="Ativos" asp-action="EditAtivo" asp-route-id="@ativo.AtivoUuid" class="btn btn-primary btn-sm">Editar</a>
+                                    </td>
                                 </tr>
                             }
                             </tbody>
-                        </table>
-                    }
+                        </table>                    }
                     else
                     {
                         <div class="alert alert-info text-center">
