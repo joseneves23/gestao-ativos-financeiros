@@ -101,12 +101,16 @@
                                     <td>@ativo.DataInicio.ToShortDateString()</td>
                                     <td>@ativo.DuracaoMeses</td>
                                     <td>
-                                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("DetalhesAtivo", "Home", new { id = ativo.AtivoUuid })">
+                                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("DetalhesAtivo", "Ativos", new { id = ativo.AtivoUuid })">
                                             Ver Detalhes
                                         </a>
                                         <a asp-controller="Ativos" asp-action="EditAtivo" asp-route-id="@ativo.AtivoUuid" class="btn btn-primary btn-sm">
                                             Editar
                                         </a>
+                                        <form asp-controller="Ativos" asp-action="DeleteAtivo" asp-route-id="@ativo.AtivoUuid" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este ativo?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                        </form>
                                     </td>
                                 </tr>
                             }

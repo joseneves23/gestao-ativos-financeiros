@@ -76,7 +76,7 @@ public partial class MeuDbContext : DbContext
                 .HasPrecision(10, 2)
                 .HasColumnName("valor_inicial");
 
-            entity.HasOne(d => d.UserUu).WithMany(p => p.Ativos)
+            entity.HasOne(d => d.User).WithMany(p => p.Ativos)
                 .HasForeignKey(d => d.UserUuid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("ativos_user_uuid_fkey");

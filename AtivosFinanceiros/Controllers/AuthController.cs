@@ -57,7 +57,7 @@ public class AuthController : Controller
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return RedirectToAction("MeusAtivos", "Home");
+            return RedirectToAction("MeusAtivos", "Ativos");
         }
 
         return View();
