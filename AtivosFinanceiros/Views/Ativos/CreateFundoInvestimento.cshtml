@@ -1,0 +1,62 @@
+@model AtivosFinanceiros.Models.FundoInvestimento
+
+@{
+    ViewData["Title"] = "Adicionar Fundo de Investimento";
+    Layout = null;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">@ViewData["Title"]</h2>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Message"]
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+
+                    <form asp-controller="Ativos" asp-action="CreateFundoInvestimento" method="post">
+                        <input type="hidden" asp-for="AtivoUuid" value="@ViewBag.AtivoUuid" />
+
+                        <div class="form-group mb-3">
+                            <label for="JurosPadrao">Juros Padrão (%):</label>
+                            <input type="number" step="0.01" id="JurosPadrao" name="JurosPadrao" class="form-control" required />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="JurosMensal">Juros Mensal (%):</label>
+                            <input type="number" step="0.01" id="JurosMensal" name="JurosMensal" class="form-control" required />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="MonteInvestido">Montante Investido (€):</label>
+                            <input type="number" step="0.01" id="MonteInvestido" name="MonteInvestido" class="form-control" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Adicionar Fundo</button>
+                    </form>
+
+                    <a href="/Ativos/MeusAtivos" class="btn btn-secondary mt-3">Ver Meus Ativos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/_framework/aspnetcore-browser-refresh.js"></script>
