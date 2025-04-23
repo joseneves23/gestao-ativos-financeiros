@@ -82,7 +82,7 @@ public class AuthController : Controller
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
                 _logger.LogInformation($"User logged in: {user.Username} with UUID: {user.UserUuid}");
-                return RedirectToAction("CreateAtivoo", "Ativos");
+                return RedirectToAction("MeusAtivos", "Ativos");
             }
             ModelState.AddModelError("", "Invalid login attempt.");
         }
