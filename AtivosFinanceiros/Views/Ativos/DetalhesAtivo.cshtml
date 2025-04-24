@@ -53,7 +53,27 @@
                             <p><strong>Juros Mensal:</strong> @fundo.JurosMensal?.ToString("P")</p>
                         </div>
                     }
-                    
+
+                    @if (Model.TipoAtivo == "DepositoPrazo" && ViewBag.Deposito != null)
+                    {
+                    var deposito = (AtivosFinanceiros.Models.DepositoPrazo)ViewBag.Deposito;
+                    <div class="card-footer bg-light">
+                        <h5 class="fw-semibold">Informações do Depósito a Prazo</h5>
+                        <p><strong>Banco:</strong> @deposito.Banco</p>
+                        <p><strong>Número da Conta:</strong> @deposito.NumeroConta</p>
+                        <p><strong>Titulares:</strong></p>
+                        <ul>
+                            @foreach (var nome in deposito.Titulares.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                            <li>@nome.Trim()</li>
+                            }
+                        </ul>
+                        <p><strong>Taxa Anual:</strong> @(deposito.TaxaAnual?.ToString("P"))</p>
+                        <p><strong>Valor Atual:</strong> @(deposito.ValorInicial.ToString("C"))</p>
+                    </div>
+                    }
+
+
                     <a href="/Ativos/MeusAtivos" class="btn btn-secondary mt-3">Voltar</a>
                 </div>
             </div>

@@ -48,7 +48,9 @@ public class AtivosController : Controller
         decimal? ValorImovel,
         decimal? ValorRenda,
         decimal? ValorCondominio,
-        decimal? DespesasAnuais)
+        decimal? DespesasAnuais,
+        string? Titulares,
+        decimal? TaxaAnual)
     {
         // Retrieve UserUuid from claims
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -108,6 +110,8 @@ public class AtivosController : Controller
                 };
                 deposito.Banco = Banco ?? deposito.Banco;
                 deposito.NumeroConta = NumeroConta ?? deposito.NumeroConta;
+                deposito.Titulares = Titulares ?? deposito.Titulares;
+                deposito.TaxaAnual = TaxaAnual ?? deposito.TaxaAnual;
                 deposito.ValorInicial = model.ValorInicial;
                 _context.DepositoPrazos.Add(deposito);
             }
@@ -115,6 +119,8 @@ public class AtivosController : Controller
             {
                 deposito.Banco = Banco ?? deposito.Banco;
                 deposito.NumeroConta = NumeroConta ?? deposito.NumeroConta;
+                deposito.Titulares = Titulares ?? deposito.Titulares;
+                deposito.TaxaAnual = TaxaAnual ?? deposito.TaxaAnual;
                 deposito.ValorInicial = model.ValorInicial;
             }
         }
@@ -200,6 +206,7 @@ public class AtivosController : Controller
             {
                 "ImovelArrendado" => RedirectToAction("CreateImovelArrendado", new { ativoUuid = ativo.AtivoUuid }),
                 "FundoInvestimento" => RedirectToAction("CreateFundoInvestimento", new { ativoUuid = ativo.AtivoUuid }),
+                "DepositoPrazo" => RedirectToAction("CreateDepositoPrazo", new {ativoUuid = ativo.AtivoUuid}),
                 _ => RedirectToAction("MeusAtivos")
             };
             
@@ -293,6 +300,30 @@ public class AtivosController : Controller
         }
     }
     
+    public IActionResult CreateDepositoPrazo(Guid ativoUuid)
+    {
+        ViewBag.AtivoUuid = ativoUuid;
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult CreateDepositoPrazo(DepositoPrazo depositoPrazo)
+    {
+        try
+        {
+            _context.DepositoPrazos.Add(depositoPrazo);
+            _context.SaveChanges();
+            TempData["Message"] = "Depósito a prazo adicionado com sucesso!";
+            return RedirectToAction("MeusAtivos");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Erro ao guardar o depósito a prazo: " + ex.Message;
+            return View(depositoPrazo);
+        }
+    }
+
+    
     public IActionResult DetalhesAtivo(Guid id)
     {
         var ativo = _context.Ativos.FirstOrDefault(a => a.AtivoUuid == id);
@@ -309,7 +340,11 @@ public class AtivosController : Controller
         {
             ViewBag.Fundo = _context.FundoInvestimentos.FirstOrDefault(f => f.AtivoUuid == id);
         }
-
+        else if (ativo.TipoAtivo == "DepositoPrazo")
+        {
+            ViewBag.Deposito = _context.DepositoPrazos.FirstOrDefault(f => f.AtivoUuid == id);
+        }
+        
         return View(ativo);
     }
     
