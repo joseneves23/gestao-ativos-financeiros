@@ -32,23 +32,24 @@
 
                         <div class="form-group mb-3">
                             <label for="JurosPadrao">Juros Padrão (%):</label>
-                            <input type="number" step="0.01" id="JurosPadrao" name="JurosPadrao" class="form-control" required />
+                            <input type="number" step="0.01" id="JurosPadrao" asp-for="JurosPadrao" class="form-control" required />
                         </div>
 
                         <div class="form-group mb-3">
                             <label for="JurosMensal">Juros Mensal (%):</label>
-                            <input type="number" step="0.01" id="JurosMensal" name="JurosMensal" class="form-control" required />
+                            <input type="number" step="0.01" id="JurosMensal" asp-for="JurosMensal" class="form-control" required />
                         </div>
 
                         <div class="form-group mb-3">
                             <label for="MonteInvestido">Montante Investido (€):</label>
-                            <input type="number" step="0.01" id="MonteInvestido" name="MonteInvestido" class="form-control" required />
+                            <input type="number" step="0.01" id="MonteInvestido" asp-for="MonteInvestido" class="form-control" required />
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">Adicionar Fundo</button>
                     </form>
 
-                    <a href="/Ativos/MeusAtivos" class="btn btn-secondary mt-3">Ver Meus Ativos</a>
+                    <a href="/Ativos/MeusAtivos" class="btn btn-danger">Cancelar</a>
+                    <a asp-action="CreateAtivoo" class="btn btn-secondary">Voltar</a>
                 </div>
             </div>
         </div>

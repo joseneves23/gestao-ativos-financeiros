@@ -30,11 +30,11 @@
                     <form asp-controller="Ativos" asp-action="CreateAtivo" method="post">
                         <div class="form-group mb-3">
                             <label for="Nome">Nome:</label>
-                            <input type="text" id="Nome" name="Nome" class="form-control" required />
+                            <input type="text" id="Nome" asp-for="Nome" class="form-control" required />
                         </div>
                         <div class="form-group mb-3">
                             <label for="TipoAtivo">Tipo Ativo:</label>
-                            <select id="TipoAtivo" name="TipoAtivo" class="form-control">
+                            <select id="TipoAtivo" asp-for="TipoAtivo" class="form-control">
                                 <option value="">Seleciona o tipo de ativo</option>
                                 <option value="DepositoPrazo">Deposito a Prazo</option>
                                 <option value="FundoInvestimento">Fundo de Investimento</option>
@@ -43,27 +43,27 @@
                         </div>
                         <div class="form-group mb-3">
                             <label for="DataInicio">Data Início:</label>
-                            <input type="date" id="DataInicio" name="DataInicio" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/>
+                            <input type="date" id="DataInicio" asp-for="DataInicio" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/>
                         </div>
                         <div class="form-group mb-3">
                             <label for="DuracaoMeses">Duração (Meses):</label>
-                            <input type="number" id="DuracaoMeses" name="DuracaoMeses" class="form-control" required/>
+                            <input type="number" id="DuracaoMeses" asp-for="DuracaoMeses" class="form-control" required/>
                         </div>
                         <div class="form-group mb-3">
                             <label for="ValorInicial">Valor Inicial:</label>
-                            <input type="number" id="ValorInicial" name="ValorInicial" class="form-control" step="0.01" required/>
+                            <input type="number" id="ValorInicial" asp-for="ValorInicial" class="form-control" step="0.01" required/>
                         </div>
                         <div class="form-group mb-3">
                             <label for="ImpostoPerc">Percentagem Imposto:</label>
-                            <input type="number" id="ImpostoPerc" name="ImpostoPerc" class="form-control" step="0.01"/>
+                            <input type="number" id="ImpostoPerc" asp-for="ImpostoPerc" class="form-control" step="0.01"/>
                         </div>
                         <div class="form-group mb-3">
                             <label for="LucroTotal">Lucro Total:</label>
-                            <input type="number" id="LucroTotal" name="LucroTotal" class="form-control" step="0.01"/>
+                            <input type="number" id="LucroTotal" asp-for="LucroTotal" class="form-control" step="0.01"/>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Criar</button>
+                        <button type="submit" class="btn btn-primary w-100">Proximo</button>
                     </form>
-                    <a href="/Ativos/MeusAtivos" class="btn btn-secondary mt-3">Ver Meus Ativos</a>
+                    <a href="/Ativos/MeusAtivos" class="btn btn-danger">Cancelar</a>
                 </div>
                 
             </div>

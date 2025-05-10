@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using AtivosFinanceiros.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace AtivosFinanceiros.Controllers;
 
@@ -177,7 +179,12 @@ public class AtivosController : Controller
     }
     public IActionResult CreateAtivoo()
     {
-        return View();
+        TempData.Keep("Ativo");
+        var ativo = TempData["Ativo"] != null 
+            ? JsonConvert.DeserializeObject<Ativo>(TempData["Ativo"].ToString()) 
+            : new Ativo();
+
+        return View(ativo);
     }
     
     [HttpPost]
@@ -190,35 +197,200 @@ public class AtivosController : Controller
             _logger.LogError("Session error: User session expired or invalid or UserUuid not found.");
             return View("CreateAtivoo", ativo);
         }
+        ModelState.Remove("User");
+        
+        if (!ModelState.IsValid)
+        {
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("ModelState Error: {0}", error.ErrorMessage);
+            }
+            TempData["ErrorMessage"] = "Preencha todos os campos obrigatórios.";
+            return View("CreateAtivoo", ativo);
+        }
+        // Set UserUuid and User
+        ativo.UserUuid = Guid.Parse(userIdClaim.Value);
+        ativo.User = _context.Usuarios.SingleOrDefault(u => u.UserUuid == ativo.UserUuid);
+        if (ativo.User == null)
+        {
+            _logger.LogError("User not found for UserUuid: {0}", ativo.UserUuid);
+            ModelState.AddModelError("User", "User not found.");
+            return View(ativo);
+        }
+        // Verifica se o UserUuid é válido
+        if (ativo.UserUuid == Guid.Empty)
+        {
+            _logger.LogError("UserUuid está vazio ou inválido.");
+            TempData["ErrorMessage"] = "Erro ao salvar o ativo: usuário inválido.";
+            return RedirectToAction("CreateAtivoo");
+        }
+        // Recupera o usuário associado
+        var user = _context.Usuarios.SingleOrDefault(u => u.UserUuid == ativo.UserUuid);
+        if (user == null)
+        {
+            _logger.LogError("Usuário não encontrado para UserUuid: {0}", ativo.UserUuid);
+            TempData["ErrorMessage"] = "Erro ao salvar o ativo: usuário não encontrado.";
+            return RedirectToAction("CreateAtivoo");
+        }
+        // Associa o usuário ao ativo
+        ativo.User = user;
+        // Remove the validation error for the User field
+        ModelState.Remove("User");
 
+        // Armazena os dados do Ativo temporariamente
+        TempData["Ativo"] = JsonConvert.SerializeObject(ativo);
+        
+        // Redireciona para a criação do tipo específico
+        return ativo.TipoAtivo switch
+        {
+            "ImovelArrendado" => RedirectToAction("CreateImovelArrendado"),
+            "FundoInvestimento" => RedirectToAction("CreateFundoInvestimento"),
+            "DepositoPrazo" => RedirectToAction("CreateDepositoPrazo"),
+            _ => RedirectToAction("CreateAtivoo", ativo)
+        };
+    }
+    
+    public IActionResult ConfirmarAtivo()
+    {
+        if (TempData["Ativo"] == null)
+        {
+            _logger.LogError("TempData[\"Ativo\"] está vazio ou nulo.");
+            TempData["ErrorMessage"] = "Erro ao salvar os dados. Nenhum ativo encontrado.";
+            return RedirectToAction("CreateAtivoo");
+        }
+
+        TempData.Keep("Ativo");
+        var ativo = JsonConvert.DeserializeObject<Ativo>(TempData["Ativo"].ToString());
+
+        object tipoEspecifico = null;
+
+        switch (ativo.TipoAtivo)
+        {
+            case "ImovelArrendado":
+                TempData.Keep("Imovel");
+                tipoEspecifico = JsonConvert.DeserializeObject<ImovelArrendado>(TempData["Imovel"]?.ToString() ?? string.Empty);
+                break;
+            case "FundoInvestimento":
+                TempData.Keep("Fundo");
+                tipoEspecifico = JsonConvert.DeserializeObject<FundoInvestimento>(TempData["Fundo"]?.ToString() ?? string.Empty);
+                break;
+            case "DepositoPrazo":
+                TempData.Keep("Deposito");
+                tipoEspecifico = JsonConvert.DeserializeObject<DepositoPrazo>(TempData["Deposito"]?.ToString() ?? string.Empty);
+                break;
+            default:
+                TempData["ErrorMessage"] = "Tipo de ativo inválido.";
+                return RedirectToAction("CreateAtivoo");
+        }
+
+        if (tipoEspecifico == null)
+        {
+            TempData["ErrorMessage"] = "Erro ao recuperar os dados do tipo específico. Tente novamente.";
+            return RedirectToAction("CreateAtivoo");
+        }
+
+        ViewBag.Ativo = ativo;
+        ViewBag.TipoEspecifico = tipoEspecifico;
+
+        return View();
+    }
+    
+    
+    [HttpPost]
+    
+    [HttpPost]
+    public IActionResult ConfirmarAtivoSalvar()
+    {
         try
         {
-            ativo.UserUuid = Guid.Parse(userIdClaim.Value);
+            if (TempData["Ativo"] == null)
+            {
+                _logger.LogError("TempData[\"Ativo\"] está vazio ou nulo.");
+                TempData["ErrorMessage"] = "Erro ao salvar os dados. Nenhum ativo encontrado.";
+                return RedirectToAction("CreateAtivoo");
+            }
+
+            var ativo = JsonConvert.DeserializeObject<Ativo>(TempData["Ativo"].ToString());
+
+            if (ativo == null)
+            {
+                _logger.LogError("Falha ao desserializar TempData[\"Ativo\"].");
+                TempData["ErrorMessage"] = "Erro ao salvar os dados. Tente novamente.";
+                return RedirectToAction("CreateAtivoo");
+            }
+
+            // Verifica se o UserUuid é válido
+            if (ativo.UserUuid == Guid.Empty)
+            {
+                _logger.LogError("UserUuid está vazio ou inválido.");
+                TempData["ErrorMessage"] = "Erro ao salvar o ativo: usuário inválido.";
+                return RedirectToAction("CreateAtivoo");
+            }
+
+            // Recupera o usuário associado
+            var user = _context.Usuarios.SingleOrDefault(u => u.UserUuid == ativo.UserUuid);
+            if (user == null)
+            {
+                _logger.LogError("Usuário não encontrado para UserUuid: {0}", ativo.UserUuid);
+                TempData["ErrorMessage"] = "Erro ao salvar o ativo: usuário não encontrado.";
+                return RedirectToAction("CreateAtivoo");
+            }
+
+            // Associa o usuário ao ativo
+            ativo.User = user;
+
+            // Salva o ativo no banco de dados
             _context.Ativos.Add(ativo);
             _context.SaveChanges();
+            _logger.LogInformation("Ativo salvo com sucesso: {0}", ativo.Nome);
 
-            TempData["Message"] = "Ativo criado com sucesso!";
-            _logger.LogInformation($"Ativo criado com sucesso: {ativo.AtivoUuid}");
-            
-            
-
-            return ativo.TipoAtivo switch
+            // Salva os dados específicos do tipo de ativo
+            switch (ativo.TipoAtivo)
             {
-                "ImovelArrendado" => RedirectToAction("CreateImovelArrendado", new { ativoUuid = ativo.AtivoUuid }),
-                "FundoInvestimento" => RedirectToAction("CreateFundoInvestimento", new { ativoUuid = ativo.AtivoUuid }),
-                "DepositoPrazo" => RedirectToAction("CreateDepositoPrazo", new {ativoUuid = ativo.AtivoUuid}),
-                _ => RedirectToAction("MeusAtivos")
-            };
-            
+                case "ImovelArrendado":
+                    var imovel = JsonConvert.DeserializeObject<ImovelArrendado>(TempData["Imovel"]?.ToString() ?? string.Empty);
+                    if (imovel != null)
+                    {
+                        imovel.AtivoUuid = ativo.AtivoUuid;
+                        _context.ImovelArrendados.Add(imovel);
+                    }
+                    break;
+
+                case "FundoInvestimento":
+                    var fundo = JsonConvert.DeserializeObject<FundoInvestimento>(TempData["Fundo"]?.ToString() ?? string.Empty);
+                    if (fundo != null)
+                    {
+                        fundo.AtivoUuid = ativo.AtivoUuid;
+                        _context.FundoInvestimentos.Add(fundo);
+                    }
+                    break;
+
+                case "DepositoPrazo":
+                    var deposito = JsonConvert.DeserializeObject<DepositoPrazo>(TempData["Deposito"]?.ToString() ?? string.Empty);
+                    if (deposito != null)
+                    {
+                        deposito.AtivoUuid = ativo.AtivoUuid;
+                        _context.DepositoPrazos.Add(deposito);
+                    }
+                    break;
+
+                default:
+                    _logger.LogError("Tipo de ativo inválido: {0}", ativo.TipoAtivo);
+                    TempData["ErrorMessage"] = "Tipo de ativo inválido.";
+                    return RedirectToAction("CreateAtivoo");
+            }
+
+            _context.SaveChanges();
+            TempData["Message"] = "Ativo criado com sucesso!";
+            return RedirectToAction("MeusAtivos");
         }
         catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "Erro ao criar: " + ex.Message;
-            _logger.LogError(ex, "Exception while creating asset.");
-            return View("CreateAtivoo", ativo);
+            _logger.LogError(ex, "Erro ao salvar o ativo.");
+            TempData["ErrorMessage"] = "Erro ao salvar o ativo: " + ex.Message;
+            return RedirectToAction("CreateAtivoo");
         }
     }
-    
     public IActionResult MeusAtivos(string nome, string tipo, decimal? montanteMinimo, decimal? montanteMaximo)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -256,73 +428,95 @@ public class AtivosController : Controller
 
     public IActionResult CreateFundoInvestimento(Guid ativoUuid)
     {
+        TempData.Keep("Fundo"); // Preserva os dados
+        var fundo = TempData["Fundo"] != null
+            ? JsonConvert.DeserializeObject<FundoInvestimento>(TempData["Fundo"].ToString())
+            : new FundoInvestimento { AtivoUuid = ativoUuid };
+
         ViewBag.AtivoUuid = ativoUuid;
-        return View();
+        return View(fundo);
     }
 
     [HttpPost]
     public IActionResult CreateFundoInvestimento(FundoInvestimento fundoInvestimento)
     {
-        try
+        ModelState.Remove("AtivoUu");
+
+        if (!ModelState.IsValid)
         {
-            _context.FundoInvestimentos.Add(fundoInvestimento);
-            _context.SaveChanges();
-            TempData["Message"] = "Fundo de investimento adicionado com sucesso!";
-            return RedirectToAction("MeusAtivos");
-        }
-        catch (Exception ex)
-        {
-            TempData["ErrorMessage"] = "Erro ao guardar o fundo de investimento: " + ex.Message;
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("ModelState Error: {0}", error.ErrorMessage);
+            }
+            TempData["ErrorMessage"] = "Preencha todos os campos obrigatórios.";
             return View(fundoInvestimento);
         }
+
+        TempData["Fundo"] = JsonConvert.SerializeObject(fundoInvestimento);
+        return RedirectToAction("ConfirmarAtivo");
     }
     
     public IActionResult CreateImovelArrendado(Guid ativoUuid)
     {
+        TempData.Keep("Imovel");
+        var imovel = TempData["Imovel"] != null
+            ? JsonConvert.DeserializeObject<ImovelArrendado>(TempData["Imovel"].ToString())
+            : new ImovelArrendado { AtivoUuid = ativoUuid };
+
         ViewBag.AtivoUuid = ativoUuid;
-        return View();
+        return View(imovel);
     }
     
     [HttpPost]
     public IActionResult CreateImovelArrendado(ImovelArrendado imovel)
     {
-        try
+        ModelState.Remove("AtivoUu");
+
+        if (!ModelState.IsValid)
         {
-            _context.ImovelArrendados.Add(imovel);
-            _context.SaveChanges();
-            TempData["Message"] = "Imóvel arrendado adicionado com sucesso!";
-            return RedirectToAction("MeusAtivos");
-        }
-        catch (Exception ex)
-        {
-            TempData["ErrorMessage"] = "Erro ao guardar o imóvel: " + ex.Message;
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("ModelState Error: {0}", error.ErrorMessage);
+            }
+            TempData["ErrorMessage"] = "Preencha todos os campos obrigatórios.";
             return View(imovel);
         }
+
+        TempData["Imovel"] = JsonConvert.SerializeObject(imovel);
+        return RedirectToAction("ConfirmarAtivo");
     }
     
     public IActionResult CreateDepositoPrazo(Guid ativoUuid)
     {
-        ViewBag.AtivoUuid = ativoUuid;
-        return View();
-    }
+        TempData.Keep("Deposito");
+        var deposito = TempData["Deposito"] != null
+            ? JsonConvert.DeserializeObject<DepositoPrazo>(TempData["Deposito"].ToString())
+            : new DepositoPrazo { AtivoUuid = ativoUuid };
 
+        _logger.LogInformation("Deposito prazo: {0}", deposito?.Banco);
+        ViewBag.AtivoUuid = ativoUuid;
+        return View(deposito);
+    }
     [HttpPost]
     public IActionResult CreateDepositoPrazo(DepositoPrazo depositoPrazo)
     {
-        try
+        ModelState.Remove("AtivoUu");
+
+        if (!ModelState.IsValid)
         {
-            _context.DepositoPrazos.Add(depositoPrazo);
-            _context.SaveChanges();
-            TempData["Message"] = "Depósito a prazo adicionado com sucesso!";
-            return RedirectToAction("MeusAtivos");
-        }
-        catch (Exception ex)
-        {
-            TempData["ErrorMessage"] = "Erro ao guardar o depósito a prazo: " + ex.Message;
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("ModelState Error: {0}", error.ErrorMessage);
+            }
+            TempData["ErrorMessage"] = "Preencha todos os campos obrigatórios.";
             return View(depositoPrazo);
         }
+
+        TempData["Deposito"] = JsonConvert.SerializeObject(depositoPrazo);
+        return RedirectToAction("ConfirmarAtivo");
     }
 
+    
     
     public IActionResult DetalhesAtivo(Guid id)
     {
