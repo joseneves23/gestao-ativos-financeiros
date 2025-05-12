@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using AtivosFinanceiros.Models;
+using AtivosFinanceiros.Models.Builders;
 using Microsoft.AspNetCore.Authorization;
 
 namespace AtivosFinanceiros.Controllers;
@@ -56,8 +57,18 @@ public class HomeController : Controller
 
         try
         {
-            ativo.UserUuid = Guid.Parse(userIdClaim.Value);
-            _context.Ativos.Add(ativo);
+            var novoAtivo = new AtivoBuilder()
+                .ComUserUuid(Guid.Parse(userIdClaim.Value))
+                .ComNome(ativo.Nome)
+                .ComTipoAtivo(ativo.TipoAtivo)
+                .ComDataInicio(ativo.DataInicio)
+                .ComDuracaoMeses(ativo.DuracaoMeses)
+                .ComValorInicial(ativo.ValorInicial)
+                .ComImpostoPerc(ativo.ImpostoPerc)
+                .ComLucroTotal(ativo.LucroTotal)
+                .Build();
+
+            _context.Ativos.Add(novoAtivo);
             _context.SaveChanges();
             TempData["Message"] = "Ativo criado com sucesso!";
             _logger.LogInformation($"Asset created for UserUuid: {userIdClaim.Value}");
