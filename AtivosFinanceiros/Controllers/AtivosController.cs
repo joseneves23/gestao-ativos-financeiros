@@ -20,6 +20,26 @@ public class AtivosController : Controller
         _logger = logger;
     }
 
+    
+    public decimal CalcularLucroDepositoPrazo(decimal valorInicial, decimal taxaAnual, int duracaoMeses, decimal imposto)
+    {
+        decimal lucroBruto = valorInicial * (decimal)Math.Pow((double)(1 + taxaAnual / 100), (double)duracaoMeses / 12) - valorInicial;
+        return lucroBruto - (lucroBruto * imposto / 100);
+    }
+
+    public decimal CalcularLucroFundoInvestimento(decimal monteInvestido, decimal? jurosMensal, int duracaoMeses, decimal imposto)
+    {
+        decimal lucroBruto = monteInvestido * (jurosMensal ?? 0) / 100 * duracaoMeses;
+        return lucroBruto - (lucroBruto * imposto / 100);
+    }
+
+    public decimal CalcularLucroImovelArrendado(decimal valorRenda, decimal valorCondominio, decimal despesasAnuais, int duracaoMeses, decimal imposto)
+    {
+        decimal lucroBruto = (valorRenda - valorCondominio - despesasAnuais / 12) * duracaoMeses;
+        return lucroBruto - (lucroBruto * imposto / 100);
+    }
+    
+    
     [HttpGet]
     public IActionResult EditAtivo(Guid id)
     {
@@ -42,7 +62,7 @@ public class AtivosController : Controller
         Ativo model,
         string? Banco,
         string? NumeroConta,
-        decimal ValorInicial,
+        decimal? ValorAtual,
         decimal? JurosPadrao,
         decimal? JurosMensal,
         decimal? MonteInvestido,
@@ -96,7 +116,6 @@ public class AtivosController : Controller
         ativo.DuracaoMeses = model.DuracaoMeses;
         ativo.ValorInicial = model.ValorInicial;
         ativo.ImpostoPerc = model.ImpostoPerc;
-        ativo.LucroTotal = model.LucroTotal;
         ativo.UserUuid = model.UserUuid;
 
         _logger.LogInformation(model.TipoAtivo);
@@ -114,7 +133,7 @@ public class AtivosController : Controller
                 deposito.NumeroConta = NumeroConta ?? deposito.NumeroConta;
                 deposito.Titulares = Titulares ?? deposito.Titulares;
                 deposito.TaxaAnual = TaxaAnual ?? deposito.TaxaAnual;
-                deposito.ValorInicial = model.ValorInicial;
+                deposito.ValorInicial = ValorAtual ?? deposito.ValorInicial;
                 _context.DepositoPrazos.Add(deposito);
             }
             else
@@ -123,8 +142,13 @@ public class AtivosController : Controller
                 deposito.NumeroConta = NumeroConta ?? deposito.NumeroConta;
                 deposito.Titulares = Titulares ?? deposito.Titulares;
                 deposito.TaxaAnual = TaxaAnual ?? deposito.TaxaAnual;
-                deposito.ValorInicial = model.ValorInicial;
+                deposito.ValorInicial = ValorAtual ?? deposito.ValorInicial;
             }
+            ativo.LucroTotal = CalcularLucroDepositoPrazo(
+                model.ValorInicial,
+                deposito.TaxaAnual ?? 0,
+                model.DuracaoMeses,
+                model.ImpostoPerc ?? 0);
         }
         else if (model.TipoAtivo == "FundoInvestimento")
         {
@@ -146,6 +170,11 @@ public class AtivosController : Controller
                 fundo.JurosMensal = JurosMensal ?? fundo.JurosMensal;
                 fundo.MonteInvestido = MonteInvestido ?? fundo.MonteInvestido;
             }
+            ativo.LucroTotal = CalcularLucroFundoInvestimento(
+                MonteInvestido ?? 0,
+                fundo.JurosMensal,
+                model.DuracaoMeses,
+                model.ImpostoPerc ?? 0);
             
         }
         else if (model.TipoAtivo == "ImovelArrendado")
@@ -172,6 +201,12 @@ public class AtivosController : Controller
                 imovel.ValorCondominio = ValorCondominio ?? imovel.ValorCondominio;
                 imovel.DespesasAnuais = DespesasAnuais ?? imovel.DespesasAnuais;
             }
+            ativo.LucroTotal = CalcularLucroImovelArrendado(
+                ValorRenda ?? 0,
+                ValorCondominio ?? 0,
+                DespesasAnuais ?? 0,
+                model.DuracaoMeses,
+                model.ImpostoPerc ?? 0);
         }
 
         _context.SaveChanges();
@@ -268,15 +303,21 @@ public class AtivosController : Controller
         {
             case "ImovelArrendado":
                 TempData.Keep("Imovel");
-                tipoEspecifico = JsonConvert.DeserializeObject<ImovelArrendado>(TempData["Imovel"]?.ToString() ?? string.Empty);
+                var imovel = JsonConvert.DeserializeObject<ImovelArrendado>(TempData["Imovel"]?.ToString() ?? string.Empty);
+                ViewBag.Imovel = imovel; // Adiciona ao ViewBag
+                tipoEspecifico = imovel;
                 break;
             case "FundoInvestimento":
                 TempData.Keep("Fundo");
-                tipoEspecifico = JsonConvert.DeserializeObject<FundoInvestimento>(TempData["Fundo"]?.ToString() ?? string.Empty);
+                var fundo = JsonConvert.DeserializeObject<FundoInvestimento>(TempData["Fundo"]?.ToString() ?? string.Empty);
+                ViewBag.Fundo = fundo; // Adiciona ao ViewBag
+                tipoEspecifico = fundo;
                 break;
             case "DepositoPrazo":
                 TempData.Keep("Deposito");
-                tipoEspecifico = JsonConvert.DeserializeObject<DepositoPrazo>(TempData["Deposito"]?.ToString() ?? string.Empty);
+                var deposito = JsonConvert.DeserializeObject<DepositoPrazo>(TempData["Deposito"]?.ToString() ?? string.Empty);
+                ViewBag.Deposito = deposito; // Adiciona ao ViewBag
+                tipoEspecifico = deposito;
                 break;
             default:
                 TempData["ErrorMessage"] = "Tipo de ativo inválido.";
@@ -354,6 +395,15 @@ public class AtivosController : Controller
                         imovel.AtivoUuid = ativo.AtivoUuid;
                         _context.ImovelArrendados.Add(imovel);
                     }
+
+                    if (imovel != null)
+                        ativo.LucroTotal = CalcularLucroImovelArrendado(
+                            imovel.ValorRenda,
+                            imovel.ValorCondominio,
+                            imovel.DespesasAnuais,
+                            ativo.DuracaoMeses,
+                            ativo.ImpostoPerc ?? 0);
+                    
                     break;
 
                 case "FundoInvestimento":
@@ -363,6 +413,12 @@ public class AtivosController : Controller
                         fundo.AtivoUuid = ativo.AtivoUuid;
                         _context.FundoInvestimentos.Add(fundo);
                     }
+                    if (fundo != null)
+                        ativo.LucroTotal = CalcularLucroFundoInvestimento(
+                            fundo.MonteInvestido,
+                            fundo.JurosMensal,
+                            ativo.DuracaoMeses,
+                            ativo.ImpostoPerc ?? 0);
                     break;
 
                 case "DepositoPrazo":
@@ -372,6 +428,12 @@ public class AtivosController : Controller
                         deposito.AtivoUuid = ativo.AtivoUuid;
                         _context.DepositoPrazos.Add(deposito);
                     }
+                    if (deposito != null)
+                        ativo.LucroTotal = CalcularLucroDepositoPrazo(
+                            ativo.ValorInicial,
+                            deposito.TaxaAnual ?? 0,
+                            ativo.DuracaoMeses,
+                            ativo.ImpostoPerc ?? 0);
                     break;
 
                 default:
@@ -381,6 +443,10 @@ public class AtivosController : Controller
             }
 
             _context.SaveChanges();
+            TempData.Remove("Ativo");
+            TempData.Remove("Imovel");
+            TempData.Remove("Fundo");
+            TempData.Remove("Deposito");
             TempData["Message"] = "Ativo criado com sucesso!";
             return RedirectToAction("MeusAtivos");
         }
