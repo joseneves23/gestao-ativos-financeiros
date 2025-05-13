@@ -49,8 +49,8 @@
                         <div class="card-footer bg-light">
                             <h5 class="fw-semibold">Informações do Fundo de Investimento</h5>
                             <p><strong>Montante Investido:</strong> @fundo.MonteInvestido.ToString("C")</p>
-                            <p><strong>Juros Padrão:</strong> @fundo.JurosPadrao?.ToString("P")</p>
-                            <p><strong>Juros Mensal:</strong> @fundo.JurosMensal?.ToString("P")</p>
+                            <p><strong>Juros Padrão:</strong> @((fundo.JurosPadrao/100)?.ToString("P"))</p>
+                            <p><strong>Juros Mensal:</strong> @((fundo.JurosMensal/100)?.ToString("P"))</p>
                         </div>
                     }
 
