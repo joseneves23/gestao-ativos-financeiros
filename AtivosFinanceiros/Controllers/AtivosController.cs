@@ -303,15 +303,21 @@ public class AtivosController : Controller
         {
             case "ImovelArrendado":
                 TempData.Keep("Imovel");
-                tipoEspecifico = JsonConvert.DeserializeObject<ImovelArrendado>(TempData["Imovel"]?.ToString() ?? string.Empty);
+                var imovel = JsonConvert.DeserializeObject<ImovelArrendado>(TempData["Imovel"]?.ToString() ?? string.Empty);
+                ViewBag.Imovel = imovel; // Adiciona ao ViewBag
+                tipoEspecifico = imovel;
                 break;
             case "FundoInvestimento":
                 TempData.Keep("Fundo");
-                tipoEspecifico = JsonConvert.DeserializeObject<FundoInvestimento>(TempData["Fundo"]?.ToString() ?? string.Empty);
+                var fundo = JsonConvert.DeserializeObject<FundoInvestimento>(TempData["Fundo"]?.ToString() ?? string.Empty);
+                ViewBag.Fundo = fundo; // Adiciona ao ViewBag
+                tipoEspecifico = fundo;
                 break;
             case "DepositoPrazo":
                 TempData.Keep("Deposito");
-                tipoEspecifico = JsonConvert.DeserializeObject<DepositoPrazo>(TempData["Deposito"]?.ToString() ?? string.Empty);
+                var deposito = JsonConvert.DeserializeObject<DepositoPrazo>(TempData["Deposito"]?.ToString() ?? string.Empty);
+                ViewBag.Deposito = deposito; // Adiciona ao ViewBag
+                tipoEspecifico = deposito;
                 break;
             default:
                 TempData["ErrorMessage"] = "Tipo de ativo inválido.";
@@ -437,6 +443,10 @@ public class AtivosController : Controller
             }
 
             _context.SaveChanges();
+            TempData.Remove("Ativo");
+            TempData.Remove("Imovel");
+            TempData.Remove("Fundo");
+            TempData.Remove("Deposito");
             TempData["Message"] = "Ativo criado com sucesso!";
             return RedirectToAction("MeusAtivos");
         }
