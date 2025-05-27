@@ -57,7 +57,7 @@ public class AuthController : Controller
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return RedirectToAction("MeusAtivos", "Ativos");
+            return RedirectToAction("Index", "Home");
         }
 
         return View();
@@ -71,18 +71,20 @@ public class AuthController : Controller
             var user = _authService.ValidateUser(model.Email, model.Password);
             if (user != null)
             {
+                
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.NameIdentifier, user.UserUuid.ToString())
+                    new Claim(ClaimTypes.NameIdentifier, user.UserUuid.ToString()),
+                    new Claim("TipoPerfil", user.TipoPerfil) // Adiciona o tipo de perfil
                 };
-
+                
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
                 _logger.LogInformation($"User logged in: {user.Username} with UUID: {user.UserUuid}");
-                return RedirectToAction("MeusAtivos", "Ativos");
+                return RedirectToAction("Index", "Home");
             }
             ModelState.AddModelError("", "Invalid login attempt.");
         }

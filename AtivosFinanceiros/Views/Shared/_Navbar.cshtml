@@ -1,0 +1,30 @@
+﻿@using System.Security.Claims
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+    <a class="navbar-brand px-3" href="/">Ativos Financeiros</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/Ativos/MeusAtivos">Meus Ativos</a>
+            </li>
+            @if (User.HasClaim("TipoPerfil", "ADMINISTRADOR"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="/Admin/GerirUtilizadores">Gerir Utilizadores</a>
+                </li>
+            }
+
+        </ul>
+    </div>
+    <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline px-3">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</nav>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />

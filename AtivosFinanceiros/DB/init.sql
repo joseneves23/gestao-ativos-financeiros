@@ -67,3 +67,12 @@ CREATE TABLE relatorio_ativos (
                                   FOREIGN KEY (relatorio_uuid) REFERENCES relatorio(relatorio_uuid),
                                   FOREIGN KEY (ativo_uuid) REFERENCES ativos(ativo_uuid)
 );
+
+INSERT INTO usuario (user_uuid, email, senha, username, tipo_perfil)
+VALUES (
+           uuid_generate_v4(),
+           'admin@ativosfinanceiros.com',
+           'CW8nmnsQ91RTNDKKUbomRut//WcG+cJedQ82oyKK1WI=', -- Base64 for 'admin123'
+           'Administrador',
+           'ADMINISTRADOR'
+       );
