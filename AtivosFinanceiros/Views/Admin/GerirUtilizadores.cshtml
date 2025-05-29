@@ -1,6 +1,14 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model List<AtivosFinanceiros.Models.Usuario>
 @{
     ViewData["Title"] = "Gerir Utilizadores";
+    var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    Guid currentUserId = Guid.Empty;
+    if (!string.IsNullOrEmpty(currentUserIdString))
+    {
+        Guid.TryParse(currentUserIdString, out currentUserId);
+    }
 }
 
 <div class="container mt-5 d-flex justify-content-center">
@@ -31,9 +39,12 @@
                         <td>@user.TipoPerfil</td>
                         <td>
                             <a asp-action="EditarUtilizador" asp-route-id="@user.UserUuid" class="btn btn-sm btn-warning mx-1">Editar</a>
-                            <form asp-action="Remover" asp-route-id="@user.UserUuid" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja remover este utilizador?')">Remover</button>
-                            </form>
+                            @if (user.UserUuid != currentUserId)
+                            {
+                                <form asp-action="Remover" asp-route-id="@user.UserUuid" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja remover este utilizador?')">Remover</button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }
