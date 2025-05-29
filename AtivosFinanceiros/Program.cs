@@ -29,6 +29,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Auth/Login";
     });
 
+// Add authorization politic
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdministradorPolicy", policy =>
+        policy.RequireClaim("TipoPerfil", "ADMINISTRADOR"));
+});
+
 var connectionString = $"Host={Env.GetString("POSTGRES_HOST")};" +
                        $"Port={Env.GetString("POSTGRES_PORT")};" +
                        $"Database={Env.GetString("POSTGRES_DB")};" +
