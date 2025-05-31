@@ -1,0 +1,110 @@
+@model List<AtivosFinanceiros.Models.ViewModels.RelatorioImpostosViewModel>
+
+@{
+ViewData["Title"] = "Relatório de Impostos";
+
+string faixaDatas = "";
+var dataInicioStr = ViewBag.DataInicio as string ?? "";
+var dataFimStr = ViewBag.DataFim as string ?? "";
+
+DateTime.TryParse(dataInicioStr, out DateTime dataInicio);
+DateTime.TryParse(dataFimStr, out DateTime dataFim);
+
+if (dataInicio != default && dataFim != default)
+{
+faixaDatas = $"Relatório: {dataInicio:dd/MM/yyyy} até {dataFim:dd/MM/yyyy}";
+}
+
+bool formularioFoiEnviado = !string.IsNullOrEmpty(dataInicioStr) && !string.IsNullOrEmpty(dataFimStr);
+double totalImpostos = Model.Sum(x => x.ImpostoMensal);
+}
+
+<h2 class="mb-4">Relatório de Impostos Mensais</h2>
+
+<div id="mensagemAlerta"></div>
+
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="dataInicio" class="form-label">Data Início</label>
+            <input type="date" id="dataInicio" name="dataInicio" class="form-control" value="@dataInicioStr" required />
+        </div>
+        <div class="col-md-3">
+            <label for="dataFim" class="form-label">Data Fim</label>
+            <input type="date" id="dataFim" name="dataFim" class="form-control" value="@dataFimStr" required />
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Gerar Relatório</button>
+        </div>
+    </div>
+</form>
+
+@if (!formularioFoiEnviado)
+{
+<div class="alert alert-info">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
+}
+else if (!Model.Any())
+{
+<div class="alert alert-warning">Nenhum ativo encontrado no intervalo selecionado.</div>
+}
+else
+{
+<p class="text-muted">@faixaDatas</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+    <tr>
+        <th>Nome do Ativo</th>
+        <th>Tipo</th>
+        <th>Mês/Ano</th>
+        <th class="text-end">Imposto</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+    <tr>
+        <td>@item.Nome</td>
+        <td>@item.TipoAtivo</td>
+        <td>@item.MesAno</td>
+        <td class="text-end">@item.ImpostoMensal.ToString("C")</td>
+    </tr>
+    }
+    </tbody>
+</table>
+
+<p class="fw-bold text-end mt-3">Total de Impostos: @totalImpostos.ToString("C")</p>
+
+<form id="registrarRelatorioForm" class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-success mt-3">Salvar Relatório</button>
+</form>
+}
+
+@if (formularioFoiEnviado && Model.Any())
+{
+    <div class="d-flex justify-content-end mb-3">
+    <form method="get" action="@Url.Action("ExportarPdfRelatorioImpostos", "Relatorios")" class="mb-3">
+        <input type="hidden" name="dataInicio" value="@dataInicioStr" />
+        <input type="hidden" name="dataFim" value="@dataFimStr" />
+        <button type="submit" class="btn btn-outline-primary">Exportar PDF</button>
+    </form>
+    </div>
+}
+
+@section Scripts {
+<script>
+    function mostrarMensagemBootstrap(tipo, texto) {
+        const container = document.getElementById('mensagemAlerta');
+        container.innerHTML = `
+                <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                    ${texto}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>`;
+    }
+
+    document.getElementById('registrarRelatorioForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        mostrarMensagemBootstrap("success", "Relatório salvo com sucesso! (Simulação)");
+    });
+</script>
+}

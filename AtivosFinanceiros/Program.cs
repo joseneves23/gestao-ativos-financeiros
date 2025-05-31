@@ -3,10 +3,16 @@ using AtivosFinanceiros.Models;
 using AtivosFinanceiros.Services;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using QuestPDF;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
+
+builder.Services.AddTransient<AtivosFinanceiros.Services.Reports.PdfReportService>();
+// QuestPDF License
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
