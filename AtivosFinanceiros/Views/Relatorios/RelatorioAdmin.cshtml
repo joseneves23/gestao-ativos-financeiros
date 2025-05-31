@@ -1,0 +1,115 @@
+@{
+    <p></p>
+    ViewData["Title"] = "Relatórios de Bancos";
+
+    var dataInicioStr = Context.Request.Query["dataInicio"].ToString();
+    var dataFimStr = Context.Request.Query["dataFim"].ToString();
+
+    DateTime.TryParse(dataInicioStr, out DateTime dataInicio);
+    DateTime.TryParse(dataFimStr, out DateTime dataFim);
+
+    string faixaDatas = "";
+    if (dataInicio != default && dataFim != default)
+    {
+        faixaDatas = $"Relatório: {dataInicio:dd/MM/yyyy} até {dataFim:dd/MM/yyyy}";
+    }
+
+    //DADOS PARA TESTAR O FRONTEND -- REMOVER
+    var dadosSimulados = new List<dynamic> {
+        new { Banco = "Banco XP", Data = new DateTime(2024, 01, 15), ValorDepositado = 5000.0, JurosPagos = 120.0 },
+        new { Banco = "Banco XP", Data = new DateTime(2024, 02, 20), ValorDepositado = 3000.0, JurosPagos = 80.0 },
+        new { Banco = "Banco ABC", Data = new DateTime(2024, 03, 10), ValorDepositado = 7000.0, JurosPagos = 210.0 },
+        new { Banco = "Banco ABC", Data = new DateTime(2024, 05, 05), ValorDepositado = 4000.0, JurosPagos = 90.0 },
+        new { Banco = "Banco DEF", Data = new DateTime(2024, 04, 01), ValorDepositado = 2000.0, JurosPagos = 30.0 }
+    };
+
+    var relatorio = new List<dynamic>();
+    if (dataInicio != default && dataFim != default)
+    {
+        relatorio = dadosSimulados
+            .Where(x => x.Data >= dataInicio && x.Data <= dataFim)
+            .GroupBy(x => x.Banco)
+            .Select(g => new {
+                Banco = g.Key,
+                TotalDepositos = g.Sum(x => (double)x.ValorDepositado),
+                TotalJuros = g.Sum(x => (double)x.JurosPagos)
+            }).ToList<dynamic>();
+    }
+
+    bool formularioFoiEnviado = Context.Request.Query.ContainsKey("dataInicio") && Context.Request.Query.ContainsKey("dataFim");
+}
+
+<h2 class="mb-4">Relatório de Bancos</h2>
+
+<div id="mensagemAlerta"></div>
+
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="dataInicio" class="form-label">Data Início</label>
+            <input type="date" id="dataInicio" name="dataInicio" class="form-control" value="@dataInicioStr" required />
+        </div>
+        <div class="col-md-3">
+            <label for="dataFim" class="form-label">Data Fim</label>
+            <input type="date" id="dataFim" name="dataFim" class="form-control" value="@dataFimStr" required />
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Gerar Relatório</button>
+        </div>
+    </div>
+</form>
+
+@if (!formularioFoiEnviado)
+{
+    <div class="alert alert-info">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
+}
+else if (!relatorio.Any())
+{
+    <div class="alert alert-warning">Nenhum banco encontrado no intervalo selecionado.</div>
+}
+else
+{
+    <p class="text-muted">@faixaDatas</p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Banco</th>
+            <th class="text-end">Total Depositado</th>
+            <th class="text-end">Juros Pagos</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in relatorio)
+        {
+            <tr>
+                <td>@item.Banco</td>
+                <td class="text-end">@item.TotalDepositos.ToString("C")</td>
+                <td class="text-end">@item.TotalJuros.ToString("C")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <form id="registrarRelatorioForm" class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-success mt-3">Salvar Relatório</button>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        function mostrarMensagemBootstrap(tipo, texto) {
+            const container = document.getElementById('mensagemAlerta');
+            container.innerHTML = `
+                <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                    ${texto}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>`;
+        }
+
+        document.getElementById('registrarRelatorioForm')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+            mostrarMensagemBootstrap("success", "Relatório salvo com sucesso! (Simulação)");
+        });
+    </script>
+}

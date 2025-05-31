@@ -1,0 +1,143 @@
+@{
+    <p></p>
+    ViewData["Title"] = "Relatório de Impostos";
+
+    var dataInicioStr = Context.Request.Query["dataInicio"].ToString();
+    var dataFimStr = Context.Request.Query["dataFim"].ToString();
+
+    DateTime.TryParse(dataInicioStr, out DateTime dataInicio);
+    DateTime.TryParse(dataFimStr, out DateTime dataFim);
+
+    string faixaDatas = "";
+    if (dataInicio != default && dataFim != default)
+    {
+        faixaDatas = $"Relatório: {dataInicio:dd/MM/yyyy} até {dataFim:dd/MM/yyyy}";
+    }
+    
+    //DADOS PARA TESTAR O FRONTEND -- REMOVER
+    var todosAtivos = new List<dynamic> {
+        new { Nome = "Tesouro Selic", TipoAtivo = "ImovelArrendado", DataInicio = new DateTime(2024, 01, 10), DuracaoMeses = 12, ImpostoMensal = 15.00},
+        new { Nome = "CDB Banco XP", TipoAtivo = "DepositoPrazo", DataInicio = new DateTime(2024, 03, 05), DuracaoMeses = 6, ImpostoMensal = 12.00},
+        new { Nome = "Fundo Imobiliário YZ", TipoAtivo = "FundoInvestimento", DataInicio = new DateTime(2023, 11, 20), DuracaoMeses = 18, ImpostoMensal = 18.00},
+        new { Nome = "LCI Banco ABC", TipoAtivo = "DepositoPrazo", DataInicio = new DateTime(2024, 05, 01), DuracaoMeses = 3, ImpostoMensal = 10.00}
+    };
+
+    var relatorioMensal = new List<dynamic>();
+
+    if (dataInicio != default && dataFim != default)
+    {
+        foreach (var ativo in todosAtivos)
+        {
+            DateTime inicio = ativo.DataInicio;
+            DateTime fim = inicio.AddMonths(ativo.DuracaoMeses);
+
+            
+            if (fim >= dataInicio && inicio <= dataFim)
+            {
+                var atual = new DateTime(inicio.Year, inicio.Month, 1);
+
+                while (atual < fim)
+                {
+                    if (atual >= dataInicio && atual <= dataFim)
+                    {
+                        relatorioMensal.Add(new {
+                            ativo.Nome,
+                            ativo.TipoAtivo,
+                            DataReferencia = atual, // usado para ordenação
+                            MesAno = atual.ToString("MM/yyyy"),
+                            ativo.ImpostoMensal
+                        });
+                    }
+                    atual = atual.AddMonths(1);
+                }
+            }
+        }
+
+        // Ordenar por DataReferencia SIMULACAO
+        relatorioMensal = relatorioMensal.OrderBy(x => x.DataReferencia).ToList();
+    }
+
+    // Soma total dos impostos SIMULACAO
+    var totalImpostos = relatorioMensal.Sum(x => (double)x.ImpostoMensal);
+
+    bool formularioFoiEnviado = Context.Request.Query.ContainsKey("dataInicio") && Context.Request.Query.ContainsKey("dataFim");
+}
+
+<h2 class="mb-4">Relatório de Impostos Mensais</h2>
+
+<div id="mensagemAlerta"></div>
+
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="dataInicio" class="form-label">Data Início</label>
+            <input type="date" id="dataInicio" name="dataInicio" class="form-control" value="@dataInicioStr" required />
+        </div>
+        <div class="col-md-3">
+            <label for="dataFim" class="form-label">Data Fim</label>
+            <input type="date" id="dataFim" name="dataFim" class="form-control" value="@dataFimStr" required />
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Gerar Relatório</button>
+        </div>
+    </div>
+</form>
+
+@if (!formularioFoiEnviado)
+{
+    <div class="alert alert-info">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
+}
+else if (!relatorioMensal.Any())
+{
+    <div class="alert alert-warning">Nenhum ativo encontrado no intervalo selecionado.</div>
+}
+else
+{
+    <p class="text-muted">@faixaDatas</p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Nome do Ativo</th>
+            <th>Tipo</th>
+            <th>Mês/Ano</th>
+            <th class="text-end">Imposto</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in relatorioMensal)
+        {
+            <tr>
+                <td>@item.Nome</td>
+                <td>@item.TipoAtivo</td>
+                <td> @item.MesAno</td>
+                <td class="text-end">@item.ImpostoMensal.ToString("C")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <p class="fw-bold text-end mt-3">Total de Impostos: @totalImpostos.ToString("C")</p>
+
+    <form id="registrarRelatorioForm" class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-success mt-3">Salvar Relatório</button>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        function mostrarMensagemBootstrap(tipo, texto) {
+            const container = document.getElementById('mensagemAlerta');
+            container.innerHTML = `
+                <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                    ${texto}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>`;
+        }
+
+        document.getElementById('registrarRelatorioForm')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+            mostrarMensagemBootstrap("success", "Relatório salvo com sucesso! (Simulação)");
+        });
+    </script>
+}

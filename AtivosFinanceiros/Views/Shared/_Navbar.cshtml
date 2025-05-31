@@ -13,13 +13,25 @@
             <li class="nav-item">
                 <a class="nav-link" href="/Ativos/MeusAtivos">Meus Ativos</a>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Gerir Relatórios
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/Relatorios/RelatorioImpostos">Relatório de Impostos</a></li>
+                    <li><a class="dropdown-item" href="/Relatorios/RelatorioLucros">Relatório de Lucros</a></li>
+                    @if (User.HasClaim("TipoPerfil", "ADMINISTRADOR"))
+                    {
+                        <li><a class="dropdown-item" href="/Relatorios/RelatorioAdmin">Relatório de Bancos</a></li>
+                    }
+                </ul>
+            </li>
             @if (User.HasClaim("TipoPerfil", "ADMINISTRADOR"))
             {
                 <li class="nav-item">
                     <a class="nav-link" href="/Admin/GerirUtilizadores">Gerir Utilizadores</a>
                 </li>
             }
-
         </ul>
     </div>
     <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline px-3">
