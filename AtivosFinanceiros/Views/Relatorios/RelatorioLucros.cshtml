@@ -1,32 +1,23 @@
+@model List<AtivosFinanceiros.Models.ViewModels.RelatorioLucrosViewModel>
+
 @{
-    <p></p>
-    ViewData["Title"] = "Relatórios de Lucros";
+ViewData["Title"] = "Relatório de Lucros";
 
-    var dataInicioStr = Context.Request.Query["dataInicio"].ToString();
-    var dataFimStr = Context.Request.Query["dataFim"].ToString();
+var dataInicioStr = ViewBag.DataInicio as string ?? "";
+var dataFimStr = ViewBag.DataFim as string ?? "";
 
-    DateTime.TryParse(dataInicioStr, out DateTime dataInicio);
-    DateTime.TryParse(dataFimStr, out DateTime dataFim);
+DateTime.TryParse(dataInicioStr, out DateTime dataInicio);
+DateTime.TryParse(dataFimStr, out DateTime dataFim);
 
-    string faixaDatas = "";
-    if (dataInicio != default && dataFim != default)
-    {
-        faixaDatas = $"Relatório: {dataInicio:dd/MM/yyyy} até {dataFim:dd/MM/yyyy}";
-    }
-    
-    //DADOS PARA TESTAR O FRONTEND -- REMOVER
-    var todosAtivos = new List<dynamic> {
-        new { Nome = "Tesouro Selic", TipoAtivo = "ImovelArrendado", DataInicio = new DateTime(2024, 01, 10), DuracaoMeses = 12, LucroTotalBruto = 1200.00, LucroTotalLiquido = 1080.00, LucroMensalBruto = 100.00, LucroMensalLiquido = 90.00 },
-        new { Nome = "CDB Banco XP", TipoAtivo = "DepositoPrazo", DataInicio = new DateTime(2024, 03, 05), DuracaoMeses = 6, LucroTotalBruto = 600.00, LucroTotalLiquido = 540.00, LucroMensalBruto = 100.00, LucroMensalLiquido = 90.00 },
-        new { Nome = "Fundo Imobiliário YZ", TipoAtivo = "FundoInvestimento", DataInicio = new DateTime(2023, 11, 20), DuracaoMeses = 18, LucroTotalBruto = 2700.00, LucroTotalLiquido = 2430.00, LucroMensalBruto = 150.00, LucroMensalLiquido = 135.00 },
-        new { Nome = "LCI Banco ABC", TipoAtivo = "DepositoPrazo", DataInicio = new DateTime(2024, 05, 01), DuracaoMeses = 3, LucroTotalBruto = 300.00, LucroTotalLiquido = 270.00, LucroMensalBruto = 100.00, LucroMensalLiquido = 90.00 }
-    };
+string faixaDatas = "";
+if (dataInicio != default && dataFim != default)
+{
+faixaDatas = $"Relatório: {dataInicio:dd/MM/yyyy} até {dataFim:dd/MM/yyyy}";
+}
 
-    var ativosFiltrados = (dataInicio != default && dataFim != default)
-        ? todosAtivos.Where(a => a.DataInicio >= dataInicio && a.DataInicio <= dataFim).ToList()
-        : new List<dynamic>();
-
-    bool formularioFoiEnviado = Context.Request.Query.ContainsKey("dataInicio") && Context.Request.Query.ContainsKey("dataFim");
+bool formularioFoiEnviado = !string.IsNullOrEmpty(dataInicioStr) && !string.IsNullOrEmpty(dataFimStr);
+double totalLucroBruto = Model.Sum(x => x.LucroTotalBruto);
+double totalLucroLiquido = Model.Sum(x => x.LucroTotalLiquido);
 }
 
 <h2 class="mb-4">Relatório de Lucros</h2>
@@ -51,67 +42,77 @@
 
 @if (!formularioFoiEnviado)
 {
-    <div class="alert alert-info">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
+<div class="alert alert-info">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
 }
-else if (!ativosFiltrados.Any())
+else if (!Model.Any())
 {
-    <div class="alert alert-warning">Nenhum ativo encontrado no intervalo selecionado.</div>
+<div class="alert alert-warning">Nenhum lucro encontrado no intervalo selecionado.</div>
 }
 else
 {
-    <p class="text-muted">@faixaDatas</p>
+<p class="text-muted">@faixaDatas</p>
 
-    <table class="table table-bordered table-striped">
-        <thead>
-        <tr>
-            <th>Nome do Ativo</th>
-            <th>Tipo</th>
-            <th>Data Início</th>
-            <th class="text-end">Duração</th>
-            <th class="text-end">Lucro Total Bruto</th>
-            <th class="text-end">Lucro Total Líquido</th>
-            <th class="text-end">Lucro Mensal Bruto</th>
-            <th class="text-end">Lucro Mensal Líquido</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in ativosFiltrados)
-        {
-            <tr>
-                <td>@item.Nome</td>
-                <td>@item.TipoAtivo</td>
-                <td>@item.DataInicio.ToString("dd/MM/yyyy")</td>
-                <td class="text-end">@item.DuracaoMeses meses</td>
-                <td class="text-end">@item.LucroTotalBruto.ToString("C")</td>
-                <td class="text-end">@item.LucroTotalLiquido.ToString("C")</td>
-                <td class="text-end">@item.LucroMensalBruto.ToString("C")</td>
-                <td class="text-end">@item.LucroMensalLiquido.ToString("C")</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+<table class="table table-bordered table-striped">
+    <thead>
+    <tr>
+        <th>Nome do Ativo</th>
+        <th>Tipo</th>
+        <th class="text-end">Lucro Mensal Bruto</th>
+        <th class="text-end">Lucro Mensal Líquido</th>
+        <th class="text-end">Lucro Total Bruto</th>
+        <th class="text-end">Lucro Total Líquido</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+    <tr>
+        <td>@item.Nome</td>
+        <td>@item.TipoAtivo</td>
+        <td class="text-end">@item.LucroMensalBruto.ToString("C")</td>
+        <td class="text-end">@item.LucroMensalLiquido.ToString("C")</td>
+        <td class="text-end">@item.LucroTotalBruto.ToString("C")</td>
+        <td class="text-end">@item.LucroTotalLiquido.ToString("C")</td>
+    </tr>
+    }
+    </tbody>
+</table>
 
-    <form id="registrarRelatorioForm" method="post" action="#" class="text-end">
-        <input type="hidden" name="dataInicio" value="@dataInicio.ToString("yyyy-MM-dd")" />
-        <button type="submit" class="btn btn-success">Salvar Relatório</button>
+<p class="fw-bold text-end mt-3">
+    Total Lucro Bruto: @totalLucroBruto.ToString("C") <br />
+    Total Lucro Líquido: @totalLucroLiquido.ToString("C")
+</p>
+
+<form id="registrarRelatorioForm" class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-success mt-3">Salvar Relatório</button>
+</form>
+}
+
+@if (formularioFoiEnviado && Model.Any())
+{
+    <div class="d-flex justify-content-end mb-3">
+    <form method="get" action="@Url.Action("ExportarPdfRelatorioLucros", "Relatorios")" class="mb-3">
+        <input type="hidden" name="dataInicio" value="@dataInicioStr" />
+        <input type="hidden" name="dataFim" value="@dataFimStr" />
+        <button type="submit" class="btn btn-outline-primary">Exportar PDF</button>
     </form>
+    </div>
 }
 
 @section Scripts {
-    <script>
-        function mostrarMensagemBootstrap(tipo, texto) {
-            const container = document.getElementById('mensagemAlerta');
-            container.innerHTML = `
+<script>
+    function mostrarMensagemBootstrap(tipo, texto) {
+        const container = document.getElementById('mensagemAlerta');
+        container.innerHTML = `
                 <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
                     ${texto}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>`;
-        }
+    }
 
-        // Simular Botão de Salvar Relatorio
-        document.getElementById('registrarRelatorioForm')?.addEventListener('submit', function (e) {
-            e.preventDefault();
-            mostrarMensagemBootstrap("success", "Relatório salvo com sucesso! (Simulação)");
-        });
-    </script>
+    document.getElementById('registrarRelatorioForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        mostrarMensagemBootstrap("success", "Relatório salvo com sucesso! (Simulação)");
+    });
+</script>
 }

@@ -1,6 +1,7 @@
+@model List<AtivosFinanceiros.Models.ViewModels.RelatorioAdminViewModel>
+
 @{
-    <p></p>
-    ViewData["Title"] = "Relatórios de Bancos";
+    ViewData["Title"] = "Relatório de Bancos";
 
     var dataInicioStr = Context.Request.Query["dataInicio"].ToString();
     var dataFimStr = Context.Request.Query["dataFim"].ToString();
@@ -12,28 +13,6 @@
     if (dataInicio != default && dataFim != default)
     {
         faixaDatas = $"Relatório: {dataInicio:dd/MM/yyyy} até {dataFim:dd/MM/yyyy}";
-    }
-
-    //DADOS PARA TESTAR O FRONTEND -- REMOVER
-    var dadosSimulados = new List<dynamic> {
-        new { Banco = "Banco XP", Data = new DateTime(2024, 01, 15), ValorDepositado = 5000.0, JurosPagos = 120.0 },
-        new { Banco = "Banco XP", Data = new DateTime(2024, 02, 20), ValorDepositado = 3000.0, JurosPagos = 80.0 },
-        new { Banco = "Banco ABC", Data = new DateTime(2024, 03, 10), ValorDepositado = 7000.0, JurosPagos = 210.0 },
-        new { Banco = "Banco ABC", Data = new DateTime(2024, 05, 05), ValorDepositado = 4000.0, JurosPagos = 90.0 },
-        new { Banco = "Banco DEF", Data = new DateTime(2024, 04, 01), ValorDepositado = 2000.0, JurosPagos = 30.0 }
-    };
-
-    var relatorio = new List<dynamic>();
-    if (dataInicio != default && dataFim != default)
-    {
-        relatorio = dadosSimulados
-            .Where(x => x.Data >= dataInicio && x.Data <= dataFim)
-            .GroupBy(x => x.Banco)
-            .Select(g => new {
-                Banco = g.Key,
-                TotalDepositos = g.Sum(x => (double)x.ValorDepositado),
-                TotalJuros = g.Sum(x => (double)x.JurosPagos)
-            }).ToList<dynamic>();
     }
 
     bool formularioFoiEnviado = Context.Request.Query.ContainsKey("dataInicio") && Context.Request.Query.ContainsKey("dataFim");
@@ -63,7 +42,7 @@
 {
     <div class="alert alert-info">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
 }
-else if (!relatorio.Any())
+else if (!Model.Any())
 {
     <div class="alert alert-warning">Nenhum banco encontrado no intervalo selecionado.</div>
 }
@@ -80,12 +59,12 @@ else
         </tr>
         </thead>
         <tbody>
-        @foreach (var item in relatorio)
+        @foreach (var item in Model)
         {
             <tr>
                 <td>@item.Banco</td>
-                <td class="text-end">@item.TotalDepositos.ToString("C")</td>
-                <td class="text-end">@item.TotalJuros.ToString("C")</td>
+                <td class="text-end">@item.ValorTotalDepositado.ToString("C")</td>
+                <td class="text-end">@item.CustoTotalJuros.ToString("C")</td>
             </tr>
         }
         </tbody>
@@ -94,6 +73,17 @@ else
     <form id="registrarRelatorioForm" class="d-flex justify-content-end">
         <button type="submit" class="btn btn-success mt-3">Salvar Relatório</button>
     </form>
+}
+
+@if (formularioFoiEnviado && Model.Any())
+{
+    <div class="d-flex justify-content-end mb-3">
+        <form method="get" action="@Url.Action("ExportarPdfRelatorioAdmin", "Relatorios")">
+            <input type="hidden" name="dataInicio" value="@dataInicioStr" />
+            <input type="hidden" name="dataFim" value="@dataFimStr" />
+            <button type="submit" class="btn btn-outline-primary">Exportar PDF</button>
+        </form>
+    </div>
 }
 
 @section Scripts {
