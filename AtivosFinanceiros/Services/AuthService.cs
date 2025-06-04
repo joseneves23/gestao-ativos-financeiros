@@ -48,4 +48,18 @@ public class AuthService
         _context.Usuarios.Add(user);
         _context.SaveChanges();
     }
+    
+    public void RegisterUserAdmin(Usuario user)
+    {
+        user.Senha = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            password: user.Senha,
+            salt: new byte[0], // No salt
+            prf: KeyDerivationPrf.HMACSHA1,
+            iterationCount: 10000,
+            numBytesRequested: 256 / 8));
+
+        _context.Usuarios.Add(user);
+        _context.SaveChanges();
+    }
+
 }

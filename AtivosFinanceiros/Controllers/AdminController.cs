@@ -45,7 +45,7 @@ namespace AtivosFinanceiros.Controllers
             if (!ModelState.IsValid) return View(user);
 
             user.UserUuid = Guid.NewGuid();
-            _authService.RegisterUser(user);
+            _authService.RegisterUserAdmin(user);
 
             return RedirectToAction(nameof(GerirUtilizadores));
         }
