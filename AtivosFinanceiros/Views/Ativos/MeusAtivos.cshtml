@@ -82,17 +82,18 @@
                                     <td>
                                         @if (ativo.TipoAtivo == "DepositoPrazo")
                                         {
-                                            @ativo.DepositoPrazos?.FirstOrDefault()?.ValorInicial.ToString("C")
+                                            @ativo.DepositoPrazos?.FirstOrDefault()?.ValorInicial.ToString("C", new System.Globalization.CultureInfo("pt-PT"))
                                         }
                                         else if (ativo.TipoAtivo == "FundoInvestimento")
                                         {
-                                            @ativo.FundoInvestimentos?.FirstOrDefault()?.MonteInvestido.ToString("C")
+                                            @ativo.FundoInvestimentos?.FirstOrDefault()?.MonteInvestido.ToString("C", new System.Globalization.CultureInfo("pt-PT"))
                                         }
                                         else if (ativo.TipoAtivo == "ImovelArrendado")
                                         {
-                                            @ativo.ImovelArrendados?.FirstOrDefault()?.ValorImovel.ToString("C")
+                                            @ativo.ImovelArrendados?.FirstOrDefault()?.ValorImovel.ToString("C", new System.Globalization.CultureInfo("pt-PT"))
                                         }
                                     </td>
+                                    
                                     <td>@ativo.DataInicio.ToShortDateString()</td>
                                     <td>@ativo.DuracaoMeses</td>
                                     <td>

@@ -37,14 +37,17 @@
 
                         <div class="form-group mb-3">
                             <label for="JurosPadrao">Taxa de Juros Padrão (%):</label>
-                            <input type="number" step="0.01" id="JurosPadrao" asp-for="TaxaJurosPadrao" class="form-control" required />
+                            <input type="number" step="0.5" id="JurosPadrao" asp-for="TaxaJurosPadrao" class="form-control" required />
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">Adicionar Fundo</button>
                     </form>
 
-                    <a href="/Ativos/MeusAtivos" class="btn btn-danger mt-3 w-100">Cancelar</a>
-                    <a asp-action="CreateAtivoo" class="btn btn-secondary mt-3 w-100">Voltar</a>
+                    <div class="d-flex gap-2">
+                        <a href="/Ativos/MeusAtivos" class="btn btn-danger">Cancelar</a>
+                        <a asp-action="CreateAtivoo" class="btn btn-secondary">Voltar</a>
+                    </div>
+                    
                 </div>
             </div>
         </div>

@@ -394,7 +394,11 @@ public class AtivosController : Controller
 
         var userId = Guid.Parse(userIdClaim.Value);
 
-        var query = _context.Ativos.Where(a => a.UserUuid == userId);
+        var query = _context.Ativos
+            .Include(a => a.DepositoPrazos)
+            .Include(a => a.FundoInvestimentos)
+            .Include(a => a.ImovelArrendados)
+            .Where(a => a.UserUuid == userId);
 
         if (!string.IsNullOrEmpty(nome))
             query = query.Where(a => a.Nome.Contains(nome));
@@ -405,13 +409,13 @@ public class AtivosController : Controller
         if (montanteMinimo.HasValue || montanteMaximo.HasValue)
         {
             query = query.Where(a =>
-                (a.TipoAtivo == "DepositoPrazo" && _context.DepositoPrazos.Any(d => d.AtivoUuid == a.AtivoUuid && 
+                (a.TipoAtivo == "DepositoPrazo" && a.DepositoPrazos.Any(d =>
                     (montanteMinimo == null || d.ValorInicial >= montanteMinimo) &&
                     (montanteMaximo == null || d.ValorInicial <= montanteMaximo))) ||
-                (a.TipoAtivo == "FundoInvestimento" && _context.FundoInvestimentos.Any(f => f.AtivoUuid == a.AtivoUuid && 
+                (a.TipoAtivo == "FundoInvestimento" && a.FundoInvestimentos.Any(f =>
                     (montanteMinimo == null || f.MonteInvestido >= montanteMinimo) &&
                     (montanteMaximo == null || f.MonteInvestido <= montanteMaximo))) ||
-                (a.TipoAtivo == "ImovelArrendado" && _context.ImovelArrendados.Any(i => i.AtivoUuid == a.AtivoUuid && 
+                (a.TipoAtivo == "ImovelArrendado" && a.ImovelArrendados.Any(i =>
                     (montanteMinimo == null || i.ValorImovel >= montanteMinimo) &&
                     (montanteMaximo == null || i.ValorImovel <= montanteMaximo))));
         }

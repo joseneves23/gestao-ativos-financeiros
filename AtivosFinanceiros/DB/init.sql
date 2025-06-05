@@ -22,7 +22,6 @@ CREATE TABLE ativos (
 CREATE TABLE imovel_arrendado (
                                   imovel_uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
                                   ativo_uuid UUID NOT NULL REFERENCES ativos(ativo_uuid),
-                                  designacao VARCHAR(255) NOT NULL,
                                   localizacao VARCHAR(255) NOT NULL,
                                   valor_imovel DECIMAL(10, 2) NOT NULL,
                                   valor_renda DECIMAL(10, 2) NOT NULL,

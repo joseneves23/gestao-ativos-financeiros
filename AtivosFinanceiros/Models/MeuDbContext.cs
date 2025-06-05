@@ -80,6 +80,7 @@ public partial class MeuDbContext : DbContext
             entity.Property(e => e.Banco)
                 .HasMaxLength(255)
                 .HasColumnName("banco");
+            entity.Property(e => e.ValorInicial).HasColumnName("valor_inicial");
             entity.Property(e => e.NumeroConta)
                 .HasMaxLength(255)
                 .HasColumnName("numero_conta");
@@ -129,9 +130,6 @@ public partial class MeuDbContext : DbContext
                 .HasDefaultValueSql("uuid_generate_v4()")
                 .HasColumnName("imovel_uuid");
             entity.Property(e => e.AtivoUuid).HasColumnName("ativo_uuid");
-            entity.Property(e => e.Designacao)
-                .HasMaxLength(255)
-                .HasColumnName("designacao");
             entity.Property(e => e.DespesasAnuais)
                 .HasPrecision(10, 2)
                 .HasColumnName("despesas_anuais");

@@ -21,7 +21,7 @@
                         <dd class="col-sm-8">@Model.DuracaoMeses</dd>
 
                         <dt class="col-sm-4">Imposto (%)</dt>
-                        <dd class="col-sm-8">@Model.ImpostoPerc.ToString("P")</dd>
+                        <dd class="col-sm-8">@((Model.ImpostoPerc / 100).ToString("P"))</dd>
 
                         <dt class="col-sm-4">Lucro Total</dt>
                         <dd class="col-sm-8">@Model.LucroTotal?.ToString("C")</dd>
@@ -46,8 +46,7 @@
                         <div class="card-footer bg-light">
                             <h5 class="fw-semibold">Informações do Fundo de Investimento</h5>
                             <p><strong>Montante Investido:</strong> @fundo.MonteInvestido.ToString("C")</p>
-                            <p><strong>Taxa de Juros Padrão:</strong> @fundo.TaxaJurosPadrao.ToString("P")</p>
-                        </div>
+                            <p><strong>Taxa de Juros Padrão:</strong> @((fundo.TaxaJurosPadrao / 100).ToString("P"))</p>                        </div>
                     }
 
                     @if (Model.TipoAtivo == "DepositoPrazo" && ViewBag.Deposito != null)
@@ -64,7 +63,7 @@
                                     <li>@nome.Trim()</li>
                                 }
                             </ul>
-                            <p><strong>Taxa Anual:</strong> @deposito.TaxaJurosAnual.ToString("P")</p>
+                            <p><strong>Taxa Anual:</strong> @((deposito.TaxaJurosAnual / 100).ToString("P"))</p>
                             <p><strong>Valor Inicial:</strong> @deposito.ValorInicial.ToString("C")</p>
                         </div>
                     }
