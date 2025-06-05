@@ -15,13 +15,11 @@ public partial class Ativo
 
     public int DuracaoMeses { get; set; }
 
-    public decimal ValorInicial { get; set; }
-
-    public decimal? ImpostoPerc { get; set; }
+    public decimal ImpostoPerc { get; set; }
 
     public decimal? LucroTotal { get; set; }
 
-    public string? TipoAtivo { get; set; }
+    public string TipoAtivo { get; set; } = null!;
 
     public virtual ICollection<DepositoPrazo> DepositoPrazos { get; set; } = new List<DepositoPrazo>();
 

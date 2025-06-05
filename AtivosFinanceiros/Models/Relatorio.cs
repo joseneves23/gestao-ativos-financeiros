@@ -13,6 +13,8 @@ public partial class Relatorio
 
     public DateOnly? DataFim { get; set; }
 
+    public string TipoRelatorio { get; set; } = null!;
+
     public virtual Usuario UserUu { get; set; } = null!;
 
     public virtual ICollection<Ativo> AtivoUus { get; set; } = new List<Ativo>();

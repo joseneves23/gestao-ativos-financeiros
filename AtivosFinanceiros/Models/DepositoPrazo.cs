@@ -15,9 +15,9 @@ public partial class DepositoPrazo
 
     public string? Titulares { get; set; }
 
-    public decimal? TaxaAnual { get; set; }
-
+    public decimal TaxaJurosAnual { get; set; }
+    
     public decimal ValorInicial { get; set; }
-
+    
     public virtual Ativo AtivoUu { get; set; } = null!;
 }

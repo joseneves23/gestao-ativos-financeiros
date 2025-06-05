@@ -9,6 +9,8 @@ public partial class ImovelArrendado
 
     public Guid AtivoUuid { get; set; }
 
+    public string Designacao { get; set; } = null!;
+
     public string Localizacao { get; set; } = null!;
 
     public decimal ValorImovel { get; set; }

@@ -63,7 +63,7 @@ namespace AtivosFinanceiros.Controllers
             foreach (var ativo in ativos)
             {
                 double lucroTotalBruto = (double)(ativo.LucroTotal ?? 0m);
-                double impostoPerc = (double)(ativo.ImpostoPerc ?? 0m);
+                double impostoPerc = (double)(ativo.ImpostoPerc);
                 double lucroTotalLiquido = lucroTotalBruto * (1 - impostoPerc / 100);
 
                 double lucroMensalBruto = ativo.DuracaoMeses > 0 ? lucroTotalBruto / ativo.DuracaoMeses : 0;
@@ -116,7 +116,7 @@ namespace AtivosFinanceiros.Controllers
                 var dataAtivoInicio = ativo.DataInicio < dataInicioOnly ? dataInicioOnly : ativo.DataInicio;
                 var meses = GetMesesEntreDatas(dataAtivoInicio, dataFimOnly);
 
-                double impostoPerc = (double)(ativo.ImpostoPerc ?? 0m);
+                double impostoPerc = (double)(ativo.ImpostoPerc);
                 double lucroTotalBruto = (double)(ativo.LucroTotal ?? 0m);
                 double lucroMensalBruto = ativo.DuracaoMeses > 0 ? lucroTotalBruto / ativo.DuracaoMeses : 0;
 
@@ -179,7 +179,7 @@ namespace AtivosFinanceiros.Controllers
                     var custoTotalJuros = g.Sum(d =>
                     {
                         var lucroTotal = d.AtivoUu.LucroTotal ?? 0m;
-                        var impostoPerc = d.AtivoUu.ImpostoPerc ?? 0m;
+                        var impostoPerc = d.AtivoUu.ImpostoPerc;
                         var jurosLiquidos = lucroTotal * (1 - impostoPerc / 100);
                         return jurosLiquidos;
                     });
@@ -217,7 +217,7 @@ namespace AtivosFinanceiros.Controllers
             var relatorio = ativos.Select(ativo =>
             {
                 double lucroTotalBruto = (double)(ativo.LucroTotal ?? 0m);
-                double impostoPerc = (double)(ativo.ImpostoPerc ?? 0m);
+                double impostoPerc = (double)(ativo.ImpostoPerc);
                 double lucroTotalLiquido = lucroTotalBruto * (1 - impostoPerc / 100);
 
                 double lucroMensalBruto = ativo.DuracaoMeses > 0 ? lucroTotalBruto / ativo.DuracaoMeses : 0;
@@ -287,7 +287,7 @@ namespace AtivosFinanceiros.Controllers
                 var dataAtivoInicio = ativo.DataInicio < dataInicioOnly ? dataInicioOnly : ativo.DataInicio;
                 var meses = GetMesesEntreDatas(dataAtivoInicio, dataFimOnly);
 
-                double impostoPerc = (double)(ativo.ImpostoPerc ?? 0m);
+                double impostoPerc = (double)(ativo.ImpostoPerc);
                 double lucroTotalBruto = (double)(ativo.LucroTotal ?? 0m);
                 double lucroMensalBruto = ativo.DuracaoMeses > 0 ? lucroTotalBruto / ativo.DuracaoMeses : 0;
 
@@ -346,7 +346,7 @@ namespace AtivosFinanceiros.Controllers
                     var custoTotalJuros = g.Sum(d =>
                     {
                         var lucroTotal = d.AtivoUu.LucroTotal ?? 0m;
-                        var impostoPerc = d.AtivoUu.ImpostoPerc ?? 0m;
+                        var impostoPerc = d.AtivoUu.ImpostoPerc;
                         var jurosLiquidos = lucroTotal * (1 - impostoPerc / 100);
                         return jurosLiquidos;
                     });

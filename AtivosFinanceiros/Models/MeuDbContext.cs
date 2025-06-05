@@ -28,22 +28,9 @@ public partial class MeuDbContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            var configuration = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .Build();
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=localhost;Port=5433;Database=ES2;Username=DBUSER;Password=DBPASSWORD");
 
-            var connectionString = $"Host={configuration["POSTGRES_HOST"]};" +
-                                   $"Port={configuration["POSTGRES_PORT"]};" +
-                                   $"Database={configuration["POSTGRES_DB"]};" +
-                                   $"Username={configuration["POSTGRES_USER"]};" +
-                                   $"Password={configuration["POSTGRES_PASSWORD"]}";
-
-            optionsBuilder.UseNpgsql(connectionString);
-        }
-    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
@@ -64,6 +51,7 @@ public partial class MeuDbContext : DbContext
                 .HasColumnName("imposto_perc");
             entity.Property(e => e.LucroTotal)
                 .HasPrecision(10, 2)
+                .HasDefaultValueSql("0.0")
                 .HasColumnName("lucro_total");
             entity.Property(e => e.Nome)
                 .HasMaxLength(255)
@@ -72,9 +60,6 @@ public partial class MeuDbContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("tipo_ativo");
             entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
-            entity.Property(e => e.ValorInicial)
-                .HasPrecision(10, 2)
-                .HasColumnName("valor_inicial");
 
             entity.HasOne(d => d.User).WithMany(p => p.Ativos)
                 .HasForeignKey(d => d.UserUuid)
@@ -98,15 +83,12 @@ public partial class MeuDbContext : DbContext
             entity.Property(e => e.NumeroConta)
                 .HasMaxLength(255)
                 .HasColumnName("numero_conta");
-            entity.Property(e => e.TaxaAnual)
+            entity.Property(e => e.TaxaJurosAnual)
                 .HasPrecision(5, 2)
-                .HasColumnName("taxa_anual");
+                .HasColumnName("taxa_juros_anual");
             entity.Property(e => e.Titulares)
                 .HasMaxLength(255)
                 .HasColumnName("titulares");
-            entity.Property(e => e.ValorInicial)
-                .HasPrecision(10, 2)
-                .HasColumnName("valor_inicial");
 
             entity.HasOne(d => d.AtivoUu).WithMany(p => p.DepositoPrazos)
                 .HasForeignKey(d => d.AtivoUuid)
@@ -124,15 +106,12 @@ public partial class MeuDbContext : DbContext
                 .HasDefaultValueSql("uuid_generate_v4()")
                 .HasColumnName("fundo_uuid");
             entity.Property(e => e.AtivoUuid).HasColumnName("ativo_uuid");
-            entity.Property(e => e.JurosMensal)
-                .HasPrecision(5, 2)
-                .HasColumnName("juros_mensal");
-            entity.Property(e => e.JurosPadrao)
-                .HasPrecision(5, 2)
-                .HasColumnName("juros_padrao");
             entity.Property(e => e.MonteInvestido)
                 .HasPrecision(10, 2)
                 .HasColumnName("monte_investido");
+            entity.Property(e => e.TaxaJurosPadrao)
+                .HasPrecision(5, 2)
+                .HasColumnName("taxa_juros_padrao");
 
             entity.HasOne(d => d.AtivoUu).WithMany(p => p.FundoInvestimentos)
                 .HasForeignKey(d => d.AtivoUuid)
@@ -150,6 +129,9 @@ public partial class MeuDbContext : DbContext
                 .HasDefaultValueSql("uuid_generate_v4()")
                 .HasColumnName("imovel_uuid");
             entity.Property(e => e.AtivoUuid).HasColumnName("ativo_uuid");
+            entity.Property(e => e.Designacao)
+                .HasMaxLength(255)
+                .HasColumnName("designacao");
             entity.Property(e => e.DespesasAnuais)
                 .HasPrecision(10, 2)
                 .HasColumnName("despesas_anuais");
@@ -183,6 +165,9 @@ public partial class MeuDbContext : DbContext
                 .HasColumnName("relatorio_uuid");
             entity.Property(e => e.DataFim).HasColumnName("data_fim");
             entity.Property(e => e.DataInicio).HasColumnName("data_inicio");
+            entity.Property(e => e.TipoRelatorio)
+                .HasMaxLength(50)
+                .HasColumnName("tipo_relatorio");
             entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
 
             entity.HasOne(d => d.UserUu).WithMany(p => p.Relatorios)
@@ -216,6 +201,8 @@ public partial class MeuDbContext : DbContext
 
             entity.ToTable("usuario");
 
+            entity.HasIndex(e => e.Email, "usuario_email_key").IsUnique();
+
             entity.Property(e => e.UserUuid)
                 .HasDefaultValueSql("uuid_generate_v4()")
                 .HasColumnName("user_uuid");
@@ -232,9 +219,10 @@ public partial class MeuDbContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("username");
         });
-        
+
         OnModelCreatingPartial(modelBuilder);
     }
+
     public bool CanConnect()
     {
         try

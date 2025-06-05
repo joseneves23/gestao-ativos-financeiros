@@ -21,11 +21,8 @@
                         <dt class="col-sm-4">Duração (meses)</dt>
                         <dd class="col-sm-8">@ativo.DuracaoMeses</dd>
 
-                        <dt class="col-sm-4">Valor Inicial</dt>
-                        <dd class="col-sm-8">@ativo.ValorInicial.ToString("C")</dd>
-
                         <dt class="col-sm-4">Imposto (%)</dt>
-                        <dd class="col-sm-8">@ativo.ImpostoPerc</dd>
+                        <dd class="col-sm-8">@ativo.ImpostoPerc.ToString("P")</dd>
 
                         <dt class="col-sm-4">Lucro Total</dt>
                         <dd class="col-sm-8">@ativo.LucroTotal?.ToString("C")</dd>
@@ -48,8 +45,7 @@
                         <div class="card-footer bg-light">
                             <h5 class="fw-semibold">Informações do Fundo de Investimento</h5>
                             <p><strong>Montante Investido:</strong> @fundo.MonteInvestido.ToString("C")</p>
-                            <p><strong>Juros Padrão:</strong> @fundo.JurosPadrao?.ToString("P")</p>
-                            <p><strong>Juros Mensal:</strong> @fundo.JurosMensal?.ToString("P")</p>
+                            <p><strong>Taxa de Juros Padrão:</strong> @fundo.TaxaJurosPadrao.ToString("P")</p>
                         </div>
                     }
 
@@ -66,8 +62,8 @@
                                     <li>@nome.Trim()</li>
                                 }
                             </ul>
-                            <p><strong>Taxa Anual:</strong> @(deposito.TaxaAnual?.ToString("P"))</p>
-                            <p><strong>Valor Atual:</strong> @(deposito.ValorInicial.ToString("C"))</p>
+                            <p><strong>Taxa Anual:</strong> @deposito.TaxaJurosAnual.ToString("P")</p>
+                            <p><strong>Valor Inicial:</strong> @deposito.ValorInicial.ToString("C")</p>
                         </div>
                     }
                 </div>
