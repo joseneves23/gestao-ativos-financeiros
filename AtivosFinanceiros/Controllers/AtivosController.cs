@@ -21,24 +21,23 @@ public class AtivosController : Controller
     }
 
     
-    public decimal CalcularLucroDepositoPrazo(decimal valorInicial, decimal taxaAnual, int duracaoMeses, decimal imposto)
+    public decimal CalcularLucroDepositoPrazo(decimal valorInicial, decimal taxaAnual, int mesesCalculo, decimal imposto)
     {
-        decimal lucroBruto = valorInicial * (decimal)Math.Pow((double)(1 + taxaAnual / 100), (double)duracaoMeses / 12) - valorInicial;
+        decimal lucroBruto = valorInicial * (decimal)Math.Pow((double)(1 + taxaAnual / 100), (double)mesesCalculo / 12) - valorInicial;
         return lucroBruto - (lucroBruto * imposto / 100);
     }
 
-    public decimal CalcularLucroFundoInvestimento(decimal monteInvestido, decimal? jurosMensal, int duracaoMeses, decimal imposto)
+    public decimal CalcularLucroFundoInvestimento(decimal monteInvestido, decimal? jurosMensal, int mesesCalculo, decimal imposto)
     {
-        decimal lucroBruto = monteInvestido * (jurosMensal ?? 0) / 100 * duracaoMeses;
+        decimal lucroBruto = monteInvestido * (jurosMensal ?? 0) / 100 * mesesCalculo;
         return lucroBruto - (lucroBruto * imposto / 100);
     }
 
-    public decimal CalcularLucroImovelArrendado(decimal valorRenda, decimal valorCondominio, decimal despesasAnuais, int duracaoMeses, decimal imposto)
+    public decimal CalcularLucroImovelArrendado(decimal valorRenda, decimal valorCondominio, decimal despesasAnuais, int mesesCalculo, decimal imposto)
     {
-        decimal lucroBruto = (valorRenda - valorCondominio - despesasAnuais / 12) * duracaoMeses;
+        decimal lucroBruto = (valorRenda - valorCondominio - despesasAnuais / 12) * mesesCalculo;
         return lucroBruto - (lucroBruto * imposto / 100);
     }
-    
     
     [HttpGet]
     public IActionResult EditAtivo(Guid id)
@@ -57,7 +56,7 @@ public class AtivosController : Controller
         return View(ativo);
     }
 
-        [HttpPost]
+    [HttpPost]
     public IActionResult EditAtivo(
         Ativo model,
         string? Banco,
@@ -74,34 +73,19 @@ public class AtivosController : Controller
         string? Titulares,
         decimal? TaxaAnual)
     {
-        // Retrieve UserUuid from claims
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
         {
-            TempData["ErrorMessage"] = "User session expired or invalid.";
-            _logger.LogError("Session error: User session expired or invalid or UserUuid not found.");
+            TempData["ErrorMessage"] = "Sessão do usuário expirada ou inválida.";
             return View(model);
         }
 
-        // Set UserUuid and User
         model.UserUuid = Guid.Parse(userIdClaim.Value);
         model.User = _context.Usuarios.SingleOrDefault(u => u.UserUuid == model.UserUuid);
-        if (model.User == null)
-        {
-            _logger.LogError("User not found for UserUuid: {0}", model.UserUuid);
-            ModelState.AddModelError("User", "User not found.");
-            return View(model);
-        }
-
-        // Remove the validation error for the User field
         ModelState.Remove("User");
 
         if (!ModelState.IsValid)
         {
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                _logger.LogError("ModelState Error: {0}", error.ErrorMessage);
-            }
             return View(model);
         }
 
@@ -114,103 +98,56 @@ public class AtivosController : Controller
         ativo.Nome = model.Nome;
         ativo.DataInicio = model.DataInicio;
         ativo.DuracaoMeses = model.DuracaoMeses;
-        ativo.ValorInicial = model.ValorInicial;
         ativo.ImpostoPerc = model.ImpostoPerc;
-        ativo.UserUuid = model.UserUuid;
 
-        _logger.LogInformation(model.TipoAtivo);
-        // Update specific fields based on TipoAtivo
         if (model.TipoAtivo == "DepositoPrazo")
         {
-            var deposito = _context.DepositoPrazos.SingleOrDefault(d => d.AtivoUuid == ativo.AtivoUuid);
-            if (deposito == null)
-            {
-                deposito = new DepositoPrazo
-                {
-                    AtivoUuid = ativo.AtivoUuid,
-                };
-                deposito.Banco = Banco ?? deposito.Banco;
-                deposito.NumeroConta = NumeroConta ?? deposito.NumeroConta;
-                deposito.Titulares = Titulares ?? deposito.Titulares;
-                deposito.TaxaAnual = TaxaAnual ?? deposito.TaxaAnual;
-                deposito.ValorInicial = ValorAtual ?? deposito.ValorInicial;
-                _context.DepositoPrazos.Add(deposito);
-            }
-            else
-            {
-                deposito.Banco = Banco ?? deposito.Banco;
-                deposito.NumeroConta = NumeroConta ?? deposito.NumeroConta;
-                deposito.Titulares = Titulares ?? deposito.Titulares;
-                deposito.TaxaAnual = TaxaAnual ?? deposito.TaxaAnual;
-                deposito.ValorInicial = ValorAtual ?? deposito.ValorInicial;
-            }
+            var deposito = _context.DepositoPrazos.SingleOrDefault(d => d.AtivoUuid == ativo.AtivoUuid) ?? new DepositoPrazo { AtivoUuid = ativo.AtivoUuid };
+            deposito.Banco = Banco ?? deposito.Banco;
+            deposito.NumeroConta = NumeroConta ?? deposito.NumeroConta;
+            deposito.Titulares = Titulares ?? deposito.Titulares;
+            deposito.TaxaJurosAnual = TaxaAnual ?? deposito.TaxaJurosAnual;
+            _context.DepositoPrazos.Update(deposito);
+
             ativo.LucroTotal = CalcularLucroDepositoPrazo(
-                model.ValorInicial,
-                deposito.TaxaAnual ?? 0,
+                ValorAtual ?? 0,
+                deposito.TaxaJurosAnual,
                 model.DuracaoMeses,
-                model.ImpostoPerc ?? 0);
+                model.ImpostoPerc);
         }
         else if (model.TipoAtivo == "FundoInvestimento")
         {
-            var fundo = _context.FundoInvestimentos.SingleOrDefault(f => f.AtivoUuid == ativo.AtivoUuid);
-            if (fundo == null)
-            {
-                fundo = new FundoInvestimento
-                {
-                    AtivoUuid = ativo.AtivoUuid,
-                };
-                fundo.JurosPadrao = JurosPadrao ?? fundo.JurosPadrao;
-                fundo.JurosMensal = JurosMensal ?? fundo.JurosMensal;
-                fundo.MonteInvestido = MonteInvestido ?? fundo.MonteInvestido;
-                _context.FundoInvestimentos.Add(fundo);
-            }
-            else
-            {
-                fundo.JurosPadrao = JurosPadrao ?? fundo.JurosPadrao;
-                fundo.JurosMensal = JurosMensal ?? fundo.JurosMensal;
-                fundo.MonteInvestido = MonteInvestido ?? fundo.MonteInvestido;
-            }
+            var fundo = _context.FundoInvestimentos.SingleOrDefault(f => f.AtivoUuid == ativo.AtivoUuid) ?? new FundoInvestimento { AtivoUuid = ativo.AtivoUuid };
+            fundo.MonteInvestido = MonteInvestido ?? fundo.MonteInvestido;
+            fundo.TaxaJurosPadrao = JurosPadrao ?? fundo.TaxaJurosPadrao;
+            _context.FundoInvestimentos.Update(fundo);
+
             ativo.LucroTotal = CalcularLucroFundoInvestimento(
                 MonteInvestido ?? 0,
-                fundo.JurosMensal,
+                JurosMensal,
                 model.DuracaoMeses,
-                model.ImpostoPerc ?? 0);
-            
+                model.ImpostoPerc);
         }
         else if (model.TipoAtivo == "ImovelArrendado")
         {
-            var imovel = _context.ImovelArrendados.SingleOrDefault(i => i.AtivoUuid == ativo.AtivoUuid);
-            if (imovel == null)
-            {
-                imovel = new ImovelArrendado
-                {
-                    AtivoUuid = ativo.AtivoUuid,
-                };  
-                imovel.Localizacao = Localizacao ?? imovel.Localizacao;
-                imovel.ValorImovel = ValorImovel ?? imovel.ValorImovel;
-                imovel.ValorRenda = ValorRenda ?? imovel.ValorRenda;
-                imovel.ValorCondominio = ValorCondominio ?? imovel.ValorCondominio;
-                imovel.DespesasAnuais = DespesasAnuais ?? imovel.DespesasAnuais;
-                _context.ImovelArrendados.Add(imovel);
-            }
-            else
-            {
-                imovel.Localizacao = Localizacao ?? imovel.Localizacao;
-                imovel.ValorImovel = ValorImovel ?? imovel.ValorImovel;
-                imovel.ValorRenda = ValorRenda ?? imovel.ValorRenda;
-                imovel.ValorCondominio = ValorCondominio ?? imovel.ValorCondominio;
-                imovel.DespesasAnuais = DespesasAnuais ?? imovel.DespesasAnuais;
-            }
+            var imovel = _context.ImovelArrendados.SingleOrDefault(i => i.AtivoUuid == ativo.AtivoUuid) ?? new ImovelArrendado { AtivoUuid = ativo.AtivoUuid };
+            imovel.Localizacao = Localizacao ?? imovel.Localizacao;
+            imovel.ValorImovel = ValorImovel ?? imovel.ValorImovel;
+            imovel.ValorRenda = ValorRenda ?? imovel.ValorRenda;
+            imovel.ValorCondominio = ValorCondominio ?? imovel.ValorCondominio;
+            imovel.DespesasAnuais = DespesasAnuais ?? imovel.DespesasAnuais;
+            _context.ImovelArrendados.Update(imovel);
+
             ativo.LucroTotal = CalcularLucroImovelArrendado(
                 ValorRenda ?? 0,
                 ValorCondominio ?? 0,
                 DespesasAnuais ?? 0,
                 model.DuracaoMeses,
-                model.ImpostoPerc ?? 0);
+                model.ImpostoPerc);
         }
 
         _context.SaveChanges();
-        return RedirectToAction("MeusAtivos", "Ativos");
+        return RedirectToAction("MeusAtivos");
     }
     public IActionResult CreateAtivoo()
     {
@@ -360,7 +297,6 @@ public class AtivosController : Controller
                 return RedirectToAction("CreateAtivoo");
             }
 
-            // Verifica se o UserUuid é válido
             if (ativo.UserUuid == Guid.Empty)
             {
                 _logger.LogError("UserUuid está vazio ou inválido.");
@@ -368,7 +304,6 @@ public class AtivosController : Controller
                 return RedirectToAction("CreateAtivoo");
             }
 
-            // Recupera o usuário associado
             var user = _context.Usuarios.SingleOrDefault(u => u.UserUuid == ativo.UserUuid);
             if (user == null)
             {
@@ -377,15 +312,12 @@ public class AtivosController : Controller
                 return RedirectToAction("CreateAtivoo");
             }
 
-            // Associa o usuário ao ativo
             ativo.User = user;
 
-            // Salva o ativo no banco de dados
             _context.Ativos.Add(ativo);
             _context.SaveChanges();
             _logger.LogInformation("Ativo salvo com sucesso: {0}", ativo.Nome);
 
-            // Salva os dados específicos do tipo de ativo
             switch (ativo.TipoAtivo)
             {
                 case "ImovelArrendado":
@@ -394,16 +326,13 @@ public class AtivosController : Controller
                     {
                         imovel.AtivoUuid = ativo.AtivoUuid;
                         _context.ImovelArrendados.Add(imovel);
-                    }
-
-                    if (imovel != null)
                         ativo.LucroTotal = CalcularLucroImovelArrendado(
                             imovel.ValorRenda,
                             imovel.ValorCondominio,
                             imovel.DespesasAnuais,
                             ativo.DuracaoMeses,
-                            ativo.ImpostoPerc ?? 0);
-                    
+                            ativo.ImpostoPerc);
+                    }
                     break;
 
                 case "FundoInvestimento":
@@ -412,13 +341,12 @@ public class AtivosController : Controller
                     {
                         fundo.AtivoUuid = ativo.AtivoUuid;
                         _context.FundoInvestimentos.Add(fundo);
-                    }
-                    if (fundo != null)
                         ativo.LucroTotal = CalcularLucroFundoInvestimento(
                             fundo.MonteInvestido,
-                            fundo.JurosMensal,
+                            fundo.TaxaJurosPadrao,
                             ativo.DuracaoMeses,
-                            ativo.ImpostoPerc ?? 0);
+                            ativo.ImpostoPerc);
+                    }
                     break;
 
                 case "DepositoPrazo":
@@ -427,13 +355,12 @@ public class AtivosController : Controller
                     {
                         deposito.AtivoUuid = ativo.AtivoUuid;
                         _context.DepositoPrazos.Add(deposito);
-                    }
-                    if (deposito != null)
                         ativo.LucroTotal = CalcularLucroDepositoPrazo(
-                            ativo.ValorInicial,
-                            deposito.TaxaAnual ?? 0,
+                            deposito.TaxaJurosAnual,
+                            deposito.ValorInicial,
                             ativo.DuracaoMeses,
-                            ativo.ImpostoPerc ?? 0);
+                            ativo.ImpostoPerc);
+                    }
                     break;
 
                 default:
@@ -467,23 +394,32 @@ public class AtivosController : Controller
 
         var userId = Guid.Parse(userIdClaim.Value);
 
-        var query = _context.Ativos.Where(a => a.UserUuid == userId);
+        var query = _context.Ativos
+            .Include(a => a.DepositoPrazos)
+            .Include(a => a.FundoInvestimentos)
+            .Include(a => a.ImovelArrendados)
+            .Where(a => a.UserUuid == userId);
 
         if (!string.IsNullOrEmpty(nome))
             query = query.Where(a => a.Nome.Contains(nome));
 
         if (!string.IsNullOrEmpty(tipo))
             query = query.Where(a => a.TipoAtivo == tipo);
-        
+
         if (montanteMinimo.HasValue || montanteMaximo.HasValue)
         {
-            if (montanteMinimo.HasValue)
-                query = query.Where(a => a.ValorInicial >= montanteMinimo);
-
-            if (montanteMaximo.HasValue)
-                query = query.Where(a => a.ValorInicial <= montanteMaximo);
+            query = query.Where(a =>
+                (a.TipoAtivo == "DepositoPrazo" && a.DepositoPrazos.Any(d =>
+                    (montanteMinimo == null || d.ValorInicial >= montanteMinimo) &&
+                    (montanteMaximo == null || d.ValorInicial <= montanteMaximo))) ||
+                (a.TipoAtivo == "FundoInvestimento" && a.FundoInvestimentos.Any(f =>
+                    (montanteMinimo == null || f.MonteInvestido >= montanteMinimo) &&
+                    (montanteMaximo == null || f.MonteInvestido <= montanteMaximo))) ||
+                (a.TipoAtivo == "ImovelArrendado" && a.ImovelArrendados.Any(i =>
+                    (montanteMinimo == null || i.ValorImovel >= montanteMinimo) &&
+                    (montanteMaximo == null || i.ValorImovel <= montanteMaximo))));
         }
-        
+
         ViewBag.FiltroNome = nome;
         ViewBag.FiltroTipo = tipo;
         ViewBag.FiltroMontanteMinimo = montanteMinimo;
@@ -491,7 +427,7 @@ public class AtivosController : Controller
 
         return View(query.ToList());
     }
-
+    
     public IActionResult CreateFundoInvestimento(Guid ativoUuid)
     {
         TempData.Keep("Fundo"); // Preserva os dados

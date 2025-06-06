@@ -4,8 +4,6 @@
     ViewData["Title"] = "Meus Ativos";
 }
 
-
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -33,9 +31,9 @@
                         <div class="row">
                             <div class="form-group col-md-4 mb-3">
                                 <label for="nome">Nome:</label>
-                                <input type="text" name="nome" id="nome" class="form-control" placeholder="Pesquisar por nome" value="@ViewBag.FiltroNome"/>
+                                <input type="text" name="nome" id="nome" class="form-control" placeholder="Pesquisar por nome" value="@ViewBag.FiltroNome" />
                             </div>
-                            
+
                             <div class="form-group col-md-4 mb-3">
                                 <label for="tipo">Tipo de Ativo:</label>
                                 <select name="tipo" id="tipo" class="form-control">
@@ -45,17 +43,17 @@
                                     <option value="ImovelArrendado" selected="@(ViewBag.FiltroTipo == "ImovelArrendado")">Imóvel Arrendado</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group col-md-2 mb-3">
                                 <label for="montanteMinimo">Montante Mínimo:</label>
-                                <input type="number" name="montanteMinimo" id="montanteMinimo" class="form-control" placeholder="Ex. 100" value="@ViewBag.FiltroMontanteMinimo"/>
+                                <input type="number" name="montanteMinimo" id="montanteMinimo" class="form-control" placeholder="Ex. 100" value="@ViewBag.FiltroMontanteMinimo" />
                             </div>
-                            
+
                             <div class="form-group col-md-2 mb-3">
                                 <label for="montanteMaximo">Montante Máximo:</label>
-                                <input type="number" name="montanteMaximo" id="montanteMaximo" class="form-control" placeholder="Ex. 10000" value="@ViewBag.FiltroMontanteMaximo"/>
+                                <input type="number" name="montanteMaximo" id="montanteMaximo" class="form-control" placeholder="Ex. 10000" value="@ViewBag.FiltroMontanteMaximo" />
                             </div>
-                            
+
                             <div class="form-group col-md-12 mb-3 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
                             </div>
@@ -69,7 +67,7 @@
                             <tr>
                                 <th>Nome</th>
                                 <th>Tipo</th>
-                                <th>Valor Inicial</th>
+                                <th>Montante</th>
                                 <th>Data Início</th>
                                 <th>Duração (Meses)</th>
                                 <th>Ações</th>
@@ -81,7 +79,21 @@
                                 <tr>
                                     <td>@ativo.Nome</td>
                                     <td>@ativo.TipoAtivo</td>
-                                    <td>@ativo.ValorInicial.ToString("C")</td>
+                                    <td>
+                                        @if (ativo.TipoAtivo == "DepositoPrazo")
+                                        {
+                                            @ativo.DepositoPrazos?.FirstOrDefault()?.ValorInicial.ToString("C", new System.Globalization.CultureInfo("pt-PT"))
+                                        }
+                                        else if (ativo.TipoAtivo == "FundoInvestimento")
+                                        {
+                                            @ativo.FundoInvestimentos?.FirstOrDefault()?.MonteInvestido.ToString("C", new System.Globalization.CultureInfo("pt-PT"))
+                                        }
+                                        else if (ativo.TipoAtivo == "ImovelArrendado")
+                                        {
+                                            @ativo.ImovelArrendados?.FirstOrDefault()?.ValorImovel.ToString("C", new System.Globalization.CultureInfo("pt-PT"))
+                                        }
+                                    </td>
+                                    
                                     <td>@ativo.DataInicio.ToShortDateString()</td>
                                     <td>@ativo.DuracaoMeses</td>
                                     <td>
@@ -115,5 +127,3 @@
         </div>
     </div>
 </div>
-
-

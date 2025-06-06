@@ -9,11 +9,9 @@ public partial class FundoInvestimento
 
     public Guid AtivoUuid { get; set; }
 
-    public decimal? JurosPadrao { get; set; }
-
-    public decimal? JurosMensal { get; set; }
-
     public decimal MonteInvestido { get; set; }
+
+    public decimal TaxaJurosPadrao { get; set; }
 
     public virtual Ativo AtivoUu { get; set; } = null!;
 }

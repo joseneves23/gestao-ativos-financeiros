@@ -20,16 +20,13 @@
                         <dt class="col-sm-4">Duração (meses)</dt>
                         <dd class="col-sm-8">@Model.DuracaoMeses</dd>
 
-                        <dt class="col-sm-4">Valor Inicial</dt>
-                        <dd class="col-sm-8">@Model.ValorInicial.ToString("C")</dd>
-
                         <dt class="col-sm-4">Imposto (%)</dt>
-                        <dd class="col-sm-8">@((Model.ImpostoPerc / 100)?.ToString("P"))</dd>
-                        
+                        <dd class="col-sm-8">@((Model.ImpostoPerc / 100).ToString("P"))</dd>
+
                         <dt class="col-sm-4">Lucro Total</dt>
                         <dd class="col-sm-8">@Model.LucroTotal?.ToString("C")</dd>
                     </dl>
-                    
+
                     @if (Model.TipoAtivo == "ImovelArrendado" && ViewBag.Imovel != null)
                     {
                         var imovel = (AtivosFinanceiros.Models.ImovelArrendado)ViewBag.Imovel;
@@ -42,39 +39,37 @@
                             <p><strong>Despesas Anuais:</strong> @imovel.DespesasAnuais.ToString("C")</p>
                         </div>
                     }
-                    
+
                     @if (Model.TipoAtivo == "FundoInvestimento" && ViewBag.Fundo != null)
                     {
                         var fundo = (AtivosFinanceiros.Models.FundoInvestimento)ViewBag.Fundo;
                         <div class="card-footer bg-light">
                             <h5 class="fw-semibold">Informações do Fundo de Investimento</h5>
                             <p><strong>Montante Investido:</strong> @fundo.MonteInvestido.ToString("C")</p>
-                            <p><strong>Juros Padrão:</strong> @((fundo.JurosPadrao/100)?.ToString("P"))</p>
-                            <p><strong>Juros Mensal:</strong> @((fundo.JurosMensal/100)?.ToString("P"))</p>
-                        </div>
+                            <p><strong>Taxa de Juros Padrão:</strong> @((fundo.TaxaJurosPadrao / 100).ToString("P"))</p>                        </div>
                     }
 
                     @if (Model.TipoAtivo == "DepositoPrazo" && ViewBag.Deposito != null)
                     {
-                    var deposito = (AtivosFinanceiros.Models.DepositoPrazo)ViewBag.Deposito;
-                    <div class="card-footer bg-light">
-                        <h5 class="fw-semibold">Informações do Depósito a Prazo</h5>
-                        <p><strong>Banco:</strong> @deposito.Banco</p>
-                        <p><strong>Número da Conta:</strong> @deposito.NumeroConta</p>
-                        <p><strong>Titulares:</strong></p>
-                        <ul>
-                            @foreach (var nome in deposito.Titulares.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                            {
-                            <li>@nome.Trim()</li>
-                            }
-                        </ul>
-                        <p><strong>Taxa Anual:</strong> @((deposito.TaxaAnual / 100)?.ToString("P"))</p>
-                        <p><strong>Valor Atual:</strong> @(deposito.ValorInicial.ToString("C"))</p>
-                    </div>
+                        var deposito = (AtivosFinanceiros.Models.DepositoPrazo)ViewBag.Deposito;
+                        <div class="card-footer bg-light">
+                            <h5 class="fw-semibold">Informações do Depósito a Prazo</h5>
+                            <p><strong>Banco:</strong> @deposito.Banco</p>
+                            <p><strong>Número da Conta:</strong> @deposito.NumeroConta</p>
+                            <p><strong>Titulares:</strong></p>
+                            <ul>
+                                @foreach (var nome in deposito.Titulares.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <li>@nome.Trim()</li>
+                                }
+                            </ul>
+                            <p><strong>Taxa Anual:</strong> @((deposito.TaxaJurosAnual / 100).ToString("P"))</p>
+                            <p><strong>Valor Inicial:</strong> @deposito.ValorInicial.ToString("C")</p>
+                        </div>
                     }
-
-
-                    <a href="/Ativos/MeusAtivos" class="btn btn-secondary mt-3">Voltar</a>
+                </div>
+                <div class="card-footer">
+                    <a href="/Ativos/MeusAtivos" class="btn btn-secondary">Voltar</a>
                 </div>
             </div>
         </div>

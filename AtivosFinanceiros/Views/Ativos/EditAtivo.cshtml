@@ -41,16 +41,17 @@
                             <input type="number" id="DuracaoMeses" name="DuracaoMeses" class="form-control" value="@Model.DuracaoMeses" required />
                         </div>
                         <div class="form-group mb-3">
-                            <label for="ValorInicial">Valor Inicial:</label>
-                            <input type="number" id="ValorInicial" name="ValorInicial" class="form-control" value="@Model.ValorInicial" step="0.01" required />
-                        </div>
-                        <div class="form-group mb-3">
                             <label for="ImpostoPerc">Percentagem Imposto:</label>
                             <input type="number" id="ImpostoPerc" name="ImpostoPerc" class="form-control" value="@Model.ImpostoPerc" step="0.01" />
                         </div>
 
                         <!-- Dynamic Fields -->
                         <div id="DepositoPrazoFields" style="display: none;">
+                            <div class="form-group mb-3">
+                                <label for="ValorInicial">Valor Inicial:</label>
+                                <input type="number" id="ValorInicial" name="ValorInicial" class="form-control"
+                                       value="@(Model.DepositoPrazos?.FirstOrDefault()?.ValorInicial ?? 0)" step="0.01" />
+                            </div>
                             <div class="form-group mb-3">
                                 <label for="Banco">Banco:</label>
                                 <input type="text" id="Banco" name="Banco" class="form-control"
@@ -70,61 +71,49 @@
                             <div class="form-group mb-3">
                                 <label for="TaxaAnual">Taxa Anual (%):</label>
                                 <input type="number" step="0.01" id="TaxaAnual" name="TaxaAnual" class="form-control"
-                                       value="@(Model.DepositoPrazos?.FirstOrDefault()?.TaxaAnual ?? 0)" />
+                                       value="@(Model.DepositoPrazos?.FirstOrDefault()?.TaxaJurosAnual ?? 0)" />
                             </div>
-                            <div class="form-group mb-3">
-                                <label for="JurosPadrao">Valor Atual:</label>
-                                <input type="number" id="ValorAtual" name="ValorAtual" class="form-control"
-                                       value="@(Model.DepositoPrazos?.FirstOrDefault()?.ValorInicial ?? 0)" step="0.01" />
-                            </div>
-                            
                         </div>
 
                         <div id="FundoInvestimentoFields" style="display: none;">
                             <div class="form-group mb-3">
-                                <label for="JurosPadrao">Juros Padrão (%):</label>
-                                <input type="number" id="JurosPadrao" name="JurosPadrao" class="form-control"
-                                       value="@(Model.FundoInvestimentos?.FirstOrDefault()?.JurosPadrao ?? 0)" step="0.1" />
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="JurosPadrao">Juros Mensal (%):</label>
-                                <input type="number" id="JurosMensal" name="JurosMensal" class="form-control"
-                                       value="@(Model.FundoInvestimentos?.FirstOrDefault()?.JurosMensal ?? 0)" step="0.1" />
-                            </div>
-                            <div class="form-group mb-3">
                                 <label for="MonteInvestido">Montante Investido (€):</label>
                                 <input type="number" id="MonteInvestido" name="MonteInvestido" class="form-control"
-                                       value="@(Model.FundoInvestimentos?.FirstOrDefault()?.MonteInvestido ?? 0)" step="1" />
+                                       value="@(Model.FundoInvestimentos?.FirstOrDefault()?.MonteInvestido ?? 0)" step="0.01" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="JurosPadrao">Juros Padrão (%):</label>
+                                <input type="number" id="JurosPadrao" name="JurosPadrao" class="form-control"
+                                       value="@(Model.FundoInvestimentos?.FirstOrDefault()?.TaxaJurosPadrao ?? 0)" step="0.01" />
                             </div>
                         </div>
 
                         <div id="ImovelArrendadoFields" style="display: none;">
+                            <div class="form-group mb-3">
+                                <label for="ValorImovel">Valor do Imóvel:</label>
+                                <input type="number" id="ValorImovel" name="ValorImovel" class="form-control"
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorImovel ?? 0)" step="0.01" />
+                            </div>
                             <div class="form-group mb-3">
                                 <label for="Localizacao">Localização:</label>
                                 <input type="text" id="Localizacao" name="Localizacao" class="form-control"
                                        value="@(Model.ImovelArrendados?.FirstOrDefault()?.Localizacao ?? string.Empty)" />
                             </div>
                             <div class="form-group mb-3">
-                                <label for="ValorImovel">Valor do Imóvel:</label>
-                                <input type="number" id="ValorImovel" name="ValorImovel" class="form-control"
-                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorImovel ?? 0)" step="1" />
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="ValorImovel">Valor da Renda:</label>
+                                <label for="ValorRenda">Valor da Renda:</label>
                                 <input type="number" id="ValorRenda" name="ValorRenda" class="form-control"
-                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorRenda ?? 0)" step="1" />
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorRenda ?? 0)" step="0.01" />
                             </div>
                             <div class="form-group mb-3">
-                                <label for="ValorImovel">Valor do Condominio:</label>
+                                <label for="ValorCondominio">Valor do Condomínio:</label>
                                 <input type="number" id="ValorCondominio" name="ValorCondominio" class="form-control"
-                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorCondominio ?? 0)" step="1" />
+                                       value="@(Model.ImovelArrendados?.FirstOrDefault()?.ValorCondominio ?? 0)" step="0.01" />
                             </div>
                             <div class="form-group mb-3">
-                                <label for="ValorImovel">Despesas Anuais:</label>
+                                <label for="DespesasAnuais">Despesas Anuais:</label>
                                 <input type="number" id="DespesasAnuais" name="DespesasAnuais" class="form-control"
                                        value="@(Model.ImovelArrendados?.FirstOrDefault()?.DespesasAnuais ?? 0)" step="0.01" />
                             </div>
-                            
                         </div>
 
                         <div class="d-flex justify-content-between">
