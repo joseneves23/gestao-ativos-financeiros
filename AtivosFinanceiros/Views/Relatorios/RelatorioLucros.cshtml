@@ -19,18 +19,18 @@
     double totalLucroBruto = Model.Sum(x => x.LucroTotalBruto);
     double totalLucroLiquido = Model.Sum(x => x.LucroTotalLiquido);
 }
-
+<p></p>
 <h2 class="mb-4">Relatório de Lucros</h2>
 
 <div id="mensagemAlerta"></div>
 
 <form method="get" class="mb-4">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="dataInicio" class="form-label">Data Início</label>
             <input type="date" id="dataInicio" name="dataInicio" class="form-control" value="@dataInicioStr" required />
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="dataFim" class="form-label">Data Fim</label>
             <input type="date" id="dataFim" name="dataFim" class="form-control" value="@dataFimStr" required />
         </div>
@@ -39,17 +39,19 @@
         </div>
         <div class="col-md-3 align-self-end">
             <button type="button" class="btn btn-secondary w-100" id="btnRelatoriosGuardados">Relatórios Guardados</button>
+
         </div>
     </div>
 </form>
 
 @if (!formularioFoiEnviado)
 {
-    <div class="alert alert-info">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
+
+<div class="alert alert-info text-center">Nenhum relatório gerado. Selecione um intervalo de datas e clique em <strong>"Gerar Relatório"</strong>.</div>
 }
 else if (!Model.Any())
 {
-    <div class="alert alert-warning">Nenhum lucro encontrado no intervalo selecionado.</div>
+<div class="alert alert-warning text-center">Nenhum lucro encontrado no intervalo selecionado.</div>
 }
 else
 {

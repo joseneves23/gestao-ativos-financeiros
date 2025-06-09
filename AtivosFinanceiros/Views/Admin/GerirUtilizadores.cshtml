@@ -1,6 +1,7 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model List<AtivosFinanceiros.Models.Usuario>
+
 @{
     ViewData["Title"] = "Gerir Utilizadores";
     var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -11,52 +12,67 @@
     }
 }
 
-<div class="container mt-5 d-flex justify-content-center">
-    <div class="card shadow-sm w-100" style="max-width: 1000px;">
-        <div class="card-header bg-light text-center">
-            <h3 class="mb-0">Lista de Utilizadores</h3>
-        </div>
-        <div class="card-body">
-            <div class="mb-3 text-end">
-                <a asp-action="CriarUtilizador" class="btn btn-success">+ Criar Novo Utilizador</a>
-            </div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">Lista de Utilizadores</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Message"]
+                        </div>
+                    }
 
-            <table class="table table-bordered table-hover table-striped text-center align-middle">
-                <thead class="table-dark">
-                <tr>
-                    <th>Email</th>
-                    <th>Username</th>
-                    <th>Tipo de Perfil</th>
-                    <th style="width: 220px;">Ações</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var user in Model)
-                {
-                    <tr>
-                        <td>@user.Email</td>
-                        <td>@user.Username</td>
-                        <td>@user.TipoPerfil</td>
-                        <td>
-                            <a asp-action="EditarUtilizador" asp-route-id="@user.UserUuid" class="btn btn-sm btn-warning mx-1">Editar</a>
-                            @if (user.UserUuid != currentUserId)
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+
+                    <table class="table table-hover table-striped text-center align-middle">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>Tipo de Perfil</th>
+                                <th style="width: 220px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
                             {
-                                <form asp-action="Remover" asp-route-id="@user.UserUuid" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja remover este utilizador?')">Remover</button>
-                                </form>
+                                <tr>
+                                    <td>@user.Email</td>
+                                    <td>@user.Username</td>
+                                    <td>@user.TipoPerfil</td>
+                                    <td>
+                                        <a asp-action="EditarUtilizador" asp-route-id="@user.UserUuid" class="btn btn-sm btn-primary">Editar</a>
+                                        @if (user.UserUuid != currentUserId)
+                                        {
+                                            <form asp-action="Remover" asp-route-id="@user.UserUuid" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja remover este utilizador?')">Excluir</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
                             }
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-action="CriarUtilizador" class="btn btn-secondary">Criar Novo Utilizador</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
 
 @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
