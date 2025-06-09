@@ -72,6 +72,7 @@ else
     </table>
 
     <form id="registrarRelatorioForm" class="d-flex justify-content-end">
+        @Html.AntiForgeryToken()
         <button type="submit" class="btn btn-success mt-3">Salvar Relatório</button>
     </form>
 }
@@ -87,6 +88,18 @@ else
     </div>
 }
 
+<div id="overlayRelatorios" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-none" style="z-index: 1050;">
+    <div class="container mt-5 bg-white p-4 rounded shadow" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+        <div class="d-flex justify-content-between mb-3">
+            <h5>Relatórios Guardados</h5>
+            <button class="btn-close" id="fecharOverlay" aria-label="Fechar"></button>
+        </div>
+        <div id="listaRelatoriosGuardados">
+            <p>Carregando...</p>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         function mostrarMensagemBootstrap(tipo, texto) {
@@ -98,9 +111,121 @@ else
                 </div>`;
         }
 
+        function formatDateISO(dateStr) {
+            const partes = dateStr.split('/');
+            if (partes.length !== 3) return '';
+            return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+        }
+
         document.getElementById('registrarRelatorioForm')?.addEventListener('submit', function (e) {
             e.preventDefault();
-            mostrarMensagemBootstrap("success", "Relatório salvo com sucesso! (Simulação)");
+
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+
+            if (!dataInicio || !dataFim) {
+                mostrarMensagemBootstrap("danger", "Por favor, selecione o intervalo de datas.");
+                return;
+            }
+
+            fetch('@Url.Action("SalvarRelatorio", "Relatorios")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    DataInicio: dataInicio,
+                    DataFim: dataFim,
+                    TipoRelatorio: 'Bancos'
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na requisição');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        mostrarMensagemBootstrap("success", "Relatório salvo com sucesso!");
+                    } else {
+                        mostrarMensagemBootstrap("danger", data.message || "Erro ao salvar relatório");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarMensagemBootstrap("danger", "Erro ao salvar relatório");
+                });
+        });
+
+        document.getElementById('btnRelatoriosGuardados').addEventListener('click', function () {
+            const overlay = document.getElementById('overlayRelatorios');
+            const lista = document.getElementById('listaRelatoriosGuardados');
+
+            overlay.classList.remove('d-none');
+            lista.innerHTML = '<p>Carregando...</p>';
+
+            fetch('@Url.Action("GetRelatoriosGuardados", "Relatorios")?tipoRelatorio=Bancos')
+                .then(res => {
+                    console.log('Response status:', res.status);
+                    if (!res.ok) throw new Error('HTTP error ' + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('Dados recebidos:', data);
+                    if (!data || data.length === 0) {
+                        lista.innerHTML = '<p>Nenhum relatório salvo.</p>';
+                        return;
+                    }
+
+                    let html = '<ul class="list-group">';
+                    data.forEach(r => {
+                        let dataInicio = r.dataInicio;
+                        let dataFim = r.dataFim;
+
+                        html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${dataInicio} - ${dataFim}
+                            <button class="btn btn-sm btn-outline-primary ver-relatorio" 
+                                    data-inicio="${dataInicio}" 
+                                    data-fim="${dataFim}">Ver</button>
+                        </li>`;
+                    });
+                    html += '</ul>';
+                    lista.innerHTML = html;
+                    
+                    document.querySelectorAll('.ver-relatorio').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const inicio = this.getAttribute('data-inicio'); 
+                            const fim = this.getAttribute('data-fim');      
+
+                            const inicioISO = formatDateISO(inicio);
+                            const fimISO = formatDateISO(fim);
+
+                            // Preenche os inputs com formato ISO
+                            document.getElementById('dataInicio').value = inicioISO;
+                            document.getElementById('dataFim').value = fimISO;
+                            
+                            document.getElementById('overlayRelatorios').classList.add('d-none');
+                            
+                            const params = new URLSearchParams({
+                                dataInicio: inicioISO,
+                                dataFim: fimISO
+                            });
+
+                            window.location.href = '@Url.Action("RelatorioAdmin", "Relatorios")' + '?' + params.toString();
+                        });
+                    });
+                })
+                .catch(err => {
+                    console.error('Erro no fetch dos relatórios guardados:', err);
+                    lista.innerHTML = `<p class="text-danger">Erro ao carregar relatórios guardados.</p>`;
+                });
+        });
+
+        document.getElementById('fecharOverlay').addEventListener('click', function () {
+            document.getElementById('overlayRelatorios').classList.add('d-none');
         });
     </script>
 }

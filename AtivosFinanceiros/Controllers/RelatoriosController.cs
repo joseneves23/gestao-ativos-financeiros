@@ -379,7 +379,70 @@ namespace AtivosFinanceiros.Controllers
             return File(pdf, "application/pdf", nomeArquivo);
         }
         
+        [HttpPost]
+        public async Task<IActionResult> SalvarRelatorio([FromBody] SalvarRelatorioRequest request)
+        {
+            try
+            {
+                var userId = GetUserId();
+                if (userId == Guid.Empty)
+                {
+                    return Unauthorized();
+                }
 
+                var relatorio = new Relatorio
+                {
+                    RelatorioUuid = Guid.NewGuid(),
+                    UserUuid = userId,
+                    DataInicio = DateOnly.FromDateTime(request.DataInicio),
+                    DataFim = DateOnly.FromDateTime(request.DataFim),
+                    TipoRelatorio = request.TipoRelatorio
+                };
+
+                _context.Relatorios.Add(relatorio);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, relatorioId = relatorio.RelatorioUuid });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao salvar relatório");
+                return StatusCode(500, new { success = false, message = "Erro ao salvar relatório" });
+            }
+        }
+
+        public class SalvarRelatorioRequest
+        {
+            public DateTime DataInicio { get; set; }
+            public DateTime DataFim { get; set; }
+            public string TipoRelatorio { get; set; } = null!;
+        }
+        
+        [HttpGet]
+        public IActionResult GetRelatoriosGuardados(string tipoRelatorio)
+        {
+            var userId = GetUserId();
+            if (userId == Guid.Empty)
+            {
+                _logger.LogWarning("Tentativa de listar relatórios sem usuário autenticado.");
+                return Unauthorized();
+            }
+
+            var relatorios = _context.Relatorios
+                .Where(r => r.UserUuid == userId && r.TipoRelatorio == tipoRelatorio)
+                .OrderByDescending(r => r.DataFim)
+                .Select(r => new
+                {
+                    Id = r.RelatorioUuid,
+                    DataInicio = r.DataInicio.ToString("dd/MM/yyyy"),
+                    DataFim = r.DataFim.HasValue ? r.DataFim.Value.ToString("dd/MM/yyyy") : "",
+                    TipoRelatorio = r.TipoRelatorio
+                })
+                .ToList();
+
+            return Ok(relatorios);
+        }
+        
 
 
     }
