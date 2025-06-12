@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace AtivosFinanceiros.Models;
 
 public partial class Usuario
 {
     public Guid UserUuid { get; set; }
+
+    [Required(ErrorMessage = "O email é obrigatório")]
+    [EmailAddress(ErrorMessage = "O email informado não é válido")]
 
     public string Email { get; set; } = null!;
 
