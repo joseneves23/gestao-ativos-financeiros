@@ -39,7 +39,7 @@
 
     <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline px-3">
         @Html.AntiForgeryToken()
-        <button type="submit" class="btn btn-outline-danger btn-sm">
+        <button id="btnLogout" type="submit" class="btn btn-outline-danger btn-sm">
             <i class="fas fa-sign-out-alt me-1"></i>Logout
         </button>
     </form>
