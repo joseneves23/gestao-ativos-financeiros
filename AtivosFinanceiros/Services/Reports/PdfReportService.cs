@@ -15,6 +15,16 @@ namespace AtivosFinanceiros.Services.Reports
             DateOnly dataInicio,
             DateOnly dataFim)
         {
+            // Validação dos parâmetros
+            if (colunas == null)
+                throw new ArgumentNullException(nameof(colunas));
+    
+            if (dados == null)
+                throw new ArgumentNullException(nameof(dados));
+    
+            if (mapLinha == null)
+                throw new ArgumentNullException(nameof(mapLinha));
+            
             return Document.Create(container =>
             {
                 container.Page(page =>
